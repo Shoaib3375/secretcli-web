@@ -1,5 +1,4 @@
-// config/config.go
-package config
+package database
 
 import (
 	"log"
@@ -18,7 +17,6 @@ type Config struct {
 
 // LoadConfig reads configuration from .env file or environment variables
 func LoadConfig() (*Config, error) {
-	// Set the file name and type for Viper
 	viper.SetConfigName(".env") // name of the .env file (without extension)
 	viper.SetConfigType("env")  // type of the configuration file
 	viper.AddConfigPath(".")    // optionally look for the .env file in the working directory
