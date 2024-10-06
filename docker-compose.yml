@@ -7,6 +7,32 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=secret
-      - POSTGRED_DB=secretcli
+      - POSTGRES_DB=secretcli
     ports:
       - "5432:5432"
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Mount the Prometheus config file
+    ports:
+      - "9090:9090"  # Expose Prometheus dashboard on port 9090
+    networks:
+      - monitoring
+
+  go_service:  # Your Go application service
+    build: .
+    container_name: secretcli
+    ports:
+      - "8080:8080"  # Map container port to host port
+    env_file:
+      - .env  # Load environment variables from .env file
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge

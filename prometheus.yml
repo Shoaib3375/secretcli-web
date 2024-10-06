@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s # How frequently Prometheus scrapes metrics
+
+scrape_configs:
+- job_name: 'secretcli-web' # Name of the job
+  static_configs:
+  - targets: ['go_service:8080'] # Scrape Go service at 'secretcli-web' container on port 8080
