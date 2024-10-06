@@ -8,11 +8,12 @@ import (
 
 // Config holds the application configuration
 type Config struct {
-	DBHost     string
-	DBPort     int
-	DBUser     string
-	DBPassword string
-	DBName     string
+	DBHost        string
+	DBPort        int
+	DBUser        string
+	DBPassword    string
+	DBName        string
+	EncryptionKey string
 }
 
 // LoadConfig reads configuration from .env file or environment variables
@@ -30,15 +31,13 @@ func LoadConfig() (*Config, error) {
 	viper.AutomaticEnv()
 
 	config := &Config{
-		DBHost:     viper.GetString("DB_HOST"),
-		DBPort:     viper.GetInt("DB_PORT"),
-		DBUser:     viper.GetString("DB_USER"),
-		DBPassword: viper.GetString("DB_PASSWORD"),
-		DBName:     viper.GetString("DB_NAME"),
+		DBHost:        viper.GetString("DB_HOST"),
+		DBPort:        viper.GetInt("DB_PORT"),
+		DBUser:        viper.GetString("DB_USER"),
+		DBPassword:    viper.GetString("DB_PASSWORD"),
+		DBName:        viper.GetString("DB_NAME"),
+		EncryptionKey: viper.GetString("ENCRYPTION_KEY"), // Add this line
 	}
-
-	// Optional: Log the configuration for debugging
-	// log.Printf("Loaded configuration: %+v\n", config)
 
 	return config, nil
 }

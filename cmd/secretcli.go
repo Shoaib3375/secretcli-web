@@ -25,7 +25,7 @@ func main() {
 	router.Handle("/metrics", promhttp.Handler())
 
 	// Register routes
-	registerRoutes(router, db)
+	registerRoutes(router, db, cfg)
 
 	// Start the server
 	startServer(router)
@@ -69,8 +69,8 @@ func startServer(router http.Handler) {
 }
 
 // Register application routes
-func registerRoutes(router *chi.Mux, db *gorm.DB) {
+func registerRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
 	// Register auth-related routes from the auth package
 	auth.RegisterRoutes(router, db)
-	secret.RegisterRoutes(router, db)
+	secret.RegisterRoutes(router, db, config)
 }

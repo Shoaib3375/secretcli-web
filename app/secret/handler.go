@@ -8,16 +8,20 @@ import (
 	"github.com/mahinops/secretcli-web/model"
 	"github.com/mahinops/secretcli-web/utils/auth"
 	"github.com/mahinops/secretcli-web/utils/crypto"
+	"github.com/mahinops/secretcli-web/utils/database"
 )
 
 type SecretHandler struct {
 	service *SecretService
+	config  *database.Config
 }
 
-// NewSecretHandler creates a new instance of SecretHandler
-func NewSecretHandler(service *SecretService) *SecretHandler {
-	return &SecretHandler{service: service}
+// NewSecretHandler creates a new instance of SecretHandler// NewSecretHandler creates a new instance of SecretHandler
+func NewSecretHandler(service *SecretService, config *database.Config) *SecretHandler {
+	return &SecretHandler{service: service, config: config} // Update this line
 }
+
+// Create handles the creation of a new secret
 
 // Create handles the creation of a new secret
 func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -33,8 +37,9 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
+
 	// Encrypt the password before storing it
-	secret.Password, err = crypto.Encrypt(secret.Password, []byte("your-32-byte-key-herefgfjgukrlfj"))
+	secret.Password, err = crypto.Encrypt(secret.Password, []byte(h.config.EncryptionKey)) // Use the key from config
 	if err != nil {
 		http.Error(w, "Error encrypting password: "+err.Error(), http.StatusInternalServerError)
 		return
