@@ -26,7 +26,11 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	name, err := h.usecase.Create(ctx, user)
 	if err != nil {
-		http.Error(w, "Error registering user"+err.Error(), http.StatusInternalServerError)
+		if err.Error() == "email already exists" {
+			http.Error(w, err.Error(), http.StatusConflict) // 409 Conflict for existing email
+			return
+		}
+		http.Error(w, "Error registering user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
