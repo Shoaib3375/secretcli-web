@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi"
 	_ "github.com/lib/pq" // Import Postgres driver
 	"github.com/mahinops/secretcli-web/app/auth"
+	"github.com/mahinops/secretcli-web/app/secret"
 	"github.com/mahinops/secretcli-web/utils/database"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gorm.io/gorm"
@@ -71,4 +72,5 @@ func startServer(router http.Handler) {
 func registerRoutes(router *chi.Mux, db *gorm.DB) {
 	// Register auth-related routes from the auth package
 	auth.RegisterRoutes(router, db)
+	secret.RegisterRoutes(router, db)
 }

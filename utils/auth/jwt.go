@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -16,7 +18,7 @@ func GenerateToken(user *model.Auth) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": user.ID,
 		"email":   user.Email,
-		"exp":     time.Now().Add(time.Hour * 72).Unix(),
+		"exp":     time.Now().Add(time.Hour * 72).Unix(), // Token valid for 72 hours
 	})
 
 	// Sign the token with a secret key
@@ -26,4 +28,42 @@ func GenerateToken(user *model.Auth) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+// ValidateToken validates the JWT token from the request and returns the user information
+func ValidateToken(r *http.Request) (*model.Auth, error) {
+	// Extract the token from the Authorization header
+	bearerToken := r.Header.Get("Authorization")
+	if bearerToken == "" {
+		return nil, http.ErrNoCookie // Return an error if no token is found
+	}
+
+	// Split the token from the "Bearer" prefix
+	tokenString := strings.Split(bearerToken, " ")[1]
+
+	// Parse the token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Validate the signing method
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.NewValidationError("unexpected signing method", jwt.ValidationErrorSignatureInvalid)
+		}
+		return jwtSecret, nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, err // Return an error if the token is invalid
+	}
+
+	// Extract claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, jwt.NewValidationError("invalid claims", jwt.ValidationErrorClaimsInvalid)
+	}
+
+	// Return user information from claims
+	user := &model.Auth{
+		ID:    uint(claims["user_id"].(float64)), // Type assertion to uint
+		Email: claims["email"].(string),
+	}
+	return user, nil
 }

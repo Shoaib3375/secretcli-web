@@ -1,0 +1,28 @@
+package secret
+
+import (
+	"context"
+	"errors"
+
+	"github.com/mahinops/secretcli-web/model"
+)
+
+type SecretService struct {
+	repo model.SecretRepository
+}
+
+// NewSecretService creates a new instance of SecretService
+func NewSecretService(repo model.SecretRepository) *SecretService {
+	return &SecretService{repo: repo}
+}
+
+// Create method for secret service
+func (s *SecretService) Create(ctx context.Context, secret model.Secret) error {
+	// Validate input
+	if secret.Title == "" || secret.Password == "" {
+		return errors.New("title and password cannot be empty")
+	}
+
+	// Call the repository to save the secret
+	return s.repo.Create(ctx, secret)
+}

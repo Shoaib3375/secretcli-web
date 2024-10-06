@@ -22,7 +22,7 @@ func Connect(cfg *Config) (*gorm.DB, error) {
 	}
 
 	// Automatically migrate the schema, creating tables for your models
-	if err := db.AutoMigrate(&model.Auth{}); err != nil {
+	if err := db.AutoMigrate(&model.Auth{}, &model.Secret{}); err != nil {
 		return nil, fmt.Errorf("could not migrate database schema: %w", err)
 	}
 
