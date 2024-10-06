@@ -38,6 +38,9 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Set UserID from the authenticated user
+	secret.UserID = user.ID // Assuming user has an ID field
+
 	// Encrypt the password before storing it
 	secret.Password, err = crypto.Encrypt(secret.Password, []byte(h.config.EncryptionKey)) // Use the key from config
 	if err != nil {
