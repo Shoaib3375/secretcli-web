@@ -23,6 +23,15 @@ func (s *AuthService) Create(ctx context.Context, user model.Auth) (string, erro
 		return "", errors.New("email and password cannot be empty")
 	}
 
+	// Check if email already exists
+	exists, err := s.repo.EmailExists(ctx, user.Email)
+	if err != nil {
+		return "", err // Handle error accordingly
+	}
+	if exists {
+		return "", errors.New("email already exists") // Return an appropriate error
+	}
+
 	// Hash password
 	hashedPassword, err := crypto.HashPassword(user.Password)
 	if err != nil {

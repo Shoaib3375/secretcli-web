@@ -24,3 +24,11 @@ func (r *SqlAuthRepository) Create(ctx context.Context, user model.Auth) (string
 	}
 	return user.Name, nil
 }
+
+func (r *SqlAuthRepository) EmailExists(ctx context.Context, email string) (bool, error) {
+	var count int64
+	if err := r.db.Model(&model.Auth{}).Where("email = ?", email).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil // Return true if count is greater than 0
+}

@@ -22,4 +22,5 @@ type AuthUsecase interface {
 
 type AuthRepository interface {
 	Create(ctx context.Context, user Auth) (string, error)
+	EmailExists(ctx context.Context, email string) (bool, error)
 }
