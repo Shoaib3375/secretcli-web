@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	_ "github.com/lib/pq" // Import Postgres driver
 	"github.com/mahinops/secretcli-web/app/auth"
 	"github.com/mahinops/secretcli-web/utils/database"
@@ -15,16 +16,14 @@ func main() {
 	db := connectDatabase(cfg)
 	defer closeDatabase(db)
 
-	// Initialize repository, service, and handler
-	authRepo := auth.NewSqlAuthRepository(db)
-	authService := auth.NewAuthService(authRepo)
-	authHandler := auth.NewAuthHandler(authService)
+	// Create a new router
+	router := chi.NewRouter()
 
-	// Define routes
-	http.HandleFunc("/register", authHandler.RegisterUser)
+	// Register routes
+	registerRoutes(router, db)
 
 	// Start the server
-	startServer()
+	startServer(router)
 }
 
 // Load configuration
@@ -57,9 +56,23 @@ func closeDatabase(db *gorm.DB) {
 }
 
 // Start the HTTP server
-func startServer() {
+func startServer(router http.Handler) {
 	log.Println("Server is running on port 8080...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// Register application routes
+func registerRoutes(router *chi.Mux, db *gorm.DB) {
+	// Initialize repository, service, and handler for auth
+	authRepo := auth.NewSqlAuthRepository(db)
+	authService := auth.NewAuthService(authRepo)
+	authHandler := auth.NewAuthHandler(authService)
+
+	// Define auth routes
+	router.Route("/auth", func(r chi.Router) {
+		r.Post("/register", authHandler.RegisterUser)
+		// Add other auth-related routes here
+	})
 }
