@@ -22,8 +22,6 @@ func NewSecretHandler(service *SecretService, config *database.Config) *SecretHa
 }
 
 // Create handles the creation of a new secret
-
-// Create handles the creation of a new secret
 func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	user, err := auth.ValidateToken(r) // This function should return the user if authenticated
