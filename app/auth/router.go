@@ -15,5 +15,6 @@ func RegisterRoutes(router chi.Router, db *gorm.DB) {
 	// Define auth-related routes
 	router.Route("/auth", func(r chi.Router) {
 		r.Post("/register", authHandler.RegisterUser)
+		r.Post("/login", authHandler.LoginUser)
 	})
 }

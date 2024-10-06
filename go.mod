@@ -3,6 +3,7 @@ module github.com/mahinops/secretcli-web
 go 1.23.1
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v1.5.5
 	github.com/lib/pq v1.10.9
 	github.com/prometheus/client_golang v1.20.4
