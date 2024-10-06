@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/mahinops/secretcli-web/model"
@@ -26,7 +25,6 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	name, err := h.usecase.Create(ctx, user)
-	fmt.Println(err)
 	if err != nil {
 		http.Error(w, "Error registering user"+err.Error(), http.StatusInternalServerError)
 		return
@@ -38,5 +36,4 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		"message": "User " + name + " created successfully",
 	}
 	json.NewEncoder(w).Encode(response) // Encode the response as JSON
-
 }

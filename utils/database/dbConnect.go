@@ -1,34 +1,31 @@
 package database
 
 import (
-	"database/sql"
+	"fmt"
 	"log"
-	"strconv"
 
-	_ "github.com/lib/pq" // Import Postgres driver
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
+	"github.com/mahinops/secretcli-web/model" // Adjust the import path based on your project structure
 )
 
-// Connect establishes a connection to the database using the given configuration
-func Connect(cfg *Config) (*sql.DB, error) {
-	// Create the connection string
-	connStr := "host=" + cfg.DBHost +
-		" port=" + strconv.Itoa(cfg.DBPort) +
-		" user=" + cfg.DBUser +
-		" password=" + cfg.DBPassword +
-		" dbname=" + cfg.DBName +
-		" sslmode=disable"
+// Connect establishes a connection to the database
+func Connect(cfg *Config) (*gorm.DB, error) {
+	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName)
 
-	// Database connection
-	db, err := sql.Open("postgres", connStr)
+	// Open a connection to the database
+	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not open database connection: %w", err)
 	}
 
-	// Test the connection
-	if err := db.Ping(); err != nil {
-		return nil, err
+	// Automatically migrate the schema, creating tables for your models
+	if err := db.AutoMigrate(&model.Auth{}); err != nil {
+		return nil, fmt.Errorf("could not migrate database schema: %w", err)
 	}
 
-	log.Println("Database connection successful!")
+	log.Println("Database connection successful and schema migrated!")
 	return db, nil
 }

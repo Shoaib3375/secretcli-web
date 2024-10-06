@@ -21,7 +21,13 @@ func main() {
 	if err != nil {
 		log.Fatal("Error opening database: ", err)
 	}
-	defer db.Close()
+	defer func() {
+		sqlDB, err := db.DB()
+		if err != nil {
+			log.Fatal(err)
+		}
+		sqlDB.Close()
+	}()
 
 	// Initialize repository, service, and handler
 	authRepo := auth.NewSqlAuthRepository(db)
