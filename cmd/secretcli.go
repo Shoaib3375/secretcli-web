@@ -8,6 +8,7 @@ import (
 	_ "github.com/lib/pq" // Import Postgres driver
 	"github.com/mahinops/secretcli-web/app/auth"
 	"github.com/mahinops/secretcli-web/utils/database"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gorm.io/gorm"
 )
 
@@ -18,6 +19,9 @@ func main() {
 
 	// Create a new router
 	router := chi.NewRouter()
+
+	// Register Prometheus metrics endpoint (default system metrics)
+	router.Handle("/metrics", promhttp.Handler())
 
 	// Register routes
 	registerRoutes(router, db)
