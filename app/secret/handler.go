@@ -7,6 +7,7 @@ import (
 
 	"github.com/mahinops/secretcli-web/model"
 	"github.com/mahinops/secretcli-web/utils/auth"
+	"github.com/mahinops/secretcli-web/utils/crypto"
 )
 
 type SecretHandler struct {
@@ -30,6 +31,12 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var secret model.Secret
 	if err := json.NewDecoder(r.Body).Decode(&secret); err != nil {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+	// Encrypt the password before storing it
+	secret.Password, err = crypto.Encrypt(secret.Password, []byte("your-32-byte-key-herefgfjgukrlfj"))
+	if err != nil {
+		http.Error(w, "Error encrypting password: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
