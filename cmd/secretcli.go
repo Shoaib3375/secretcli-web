@@ -65,14 +65,6 @@ func startServer(router http.Handler) {
 
 // Register application routes
 func registerRoutes(router *chi.Mux, db *gorm.DB) {
-	// Initialize repository, service, and handler for auth
-	authRepo := auth.NewSqlAuthRepository(db)
-	authService := auth.NewAuthService(authRepo)
-	authHandler := auth.NewAuthHandler(authService)
-
-	// Define auth routes
-	router.Route("/auth", func(r chi.Router) {
-		r.Post("/register", authHandler.RegisterUser)
-		// Add other auth-related routes here
-	})
+	// Register auth-related routes from the auth package
+	auth.RegisterRoutes(router, db)
 }
