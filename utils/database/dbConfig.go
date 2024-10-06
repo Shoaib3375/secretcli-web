@@ -38,7 +38,7 @@ func LoadConfig() (*Config, error) {
 	}
 
 	// Optional: Log the configuration for debugging
-	log.Printf("Loaded configuration: %+v\n", config)
+	// log.Printf("Loaded configuration: %+v\n", config)
 
 	return config, nil
 }
