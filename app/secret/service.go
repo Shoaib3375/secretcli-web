@@ -26,3 +26,9 @@ func (s *SecretService) Create(ctx context.Context, secret model.Secret) error {
 	// Call the repository to save the secret
 	return s.repo.Create(ctx, secret)
 }
+
+// List method for secret service
+func (s *SecretService) List(ctx context.Context, userID uint) ([]model.Secret, error) {
+	// Call the repository to retrieve all secrets
+	return s.repo.List(ctx, userID)
+}

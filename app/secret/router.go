@@ -15,6 +15,7 @@ func RegisterRoutes(router chi.Router, db *gorm.DB, config *database.Config) {
 
 	// Define secret-related routes
 	router.Route("/secret", func(r chi.Router) {
-		r.Post("/create", secretHandler.Create) // Route to create a secret
+		r.Post("/create", secretHandler.Create)
+		r.Get("/list", secretHandler.List)
 	})
 }

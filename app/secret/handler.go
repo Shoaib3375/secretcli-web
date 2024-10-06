@@ -39,7 +39,7 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set UserID from the authenticated user
-	secret.UserID = user.ID // Assuming user has an ID field
+	secret.UserID = user.ID
 
 	// Encrypt the password before storing it
 	secret.Password, err = crypto.Encrypt(secret.Password, []byte(h.config.EncryptionKey)) // Use the key from config
@@ -63,4 +63,23 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 		"message": "Secret created successfully",
 	}
 	json.NewEncoder(w).Encode(response) // Encode the response as JSON
+}
+
+func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
+
+	user, err := auth.ValidateToken(r) // This function should return the user if authenticated
+	if err != nil || user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	secrets, err := h.service.List(r.Context(), user.ID)
+	if err != nil {
+		http.Error(w, "Error fetching secrets: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Encode the response as JSON
+	w.WriteHeader(http.StatusOK) // Set the status to 200 OK
+	json.NewEncoder(w).Encode(secrets)
 }

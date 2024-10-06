@@ -20,10 +20,12 @@ type Secret struct {
 
 // SecretUsecase interface defining methods related to secret use cases
 type SecretUsecase interface {
-	Create(ctx context.Context, secret Secret) error // Method to create a secret
+	Create(ctx context.Context, secret Secret) error
+	List(ctx context.Context, userID uint) ([]Secret, error)
 }
 
 // SecretRepository interface defining methods for interacting with the secret data storage
 type SecretRepository interface {
-	Create(ctx context.Context, secret Secret) error // Method to save a secret
+	Create(ctx context.Context, secret Secret) error
+	List(ctx context.Context, userID uint) ([]Secret, error)
 }
