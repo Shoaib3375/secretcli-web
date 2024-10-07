@@ -13,10 +13,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func main() {
-	cfg := loadConfig()
+// App holds the dependencies for the application
+type App struct {
+	router *chi.Mux
+	db     *gorm.DB
+	config *database.Config
+}
+
+// NewApp initializes a new App instance
+func NewApp(configFile string) (*App, error) {
+	cfg := loadConfig(configFile)
 	db := connectDatabase(cfg)
-	defer closeDatabase(db)
 
 	// Create a new router
 	router := chi.NewRouter()
@@ -27,13 +34,12 @@ func main() {
 	// Register routes
 	registerRoutes(router, db, cfg)
 
-	// Start the server
-	startServer(router)
+	return &App{router: router, db: db, config: cfg}, nil
 }
 
 // Load configuration
-func loadConfig() *database.Config {
-	cfg, err := database.LoadConfig(".env")
+func loadConfig(configFile string) *database.Config {
+	cfg, err := database.LoadConfig(configFile)
 	if err != nil {
 		log.Fatal("Error loading configuration: ", err)
 	}
@@ -50,8 +56,8 @@ func connectDatabase(cfg *database.Config) *gorm.DB {
 }
 
 // Close the database connection
-func closeDatabase(db *gorm.DB) {
-	sqlDB, err := db.DB()
+func (a *App) closeDatabase() {
+	sqlDB, err := a.db.DB()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,9 +67,9 @@ func closeDatabase(db *gorm.DB) {
 }
 
 // Start the HTTP server
-func startServer(router http.Handler) {
-	log.Println("Server is running on port 8080...")
-	if err := http.ListenAndServe(":8080", router); err != nil {
+func (a *App) startServer(port string) {
+	log.Println("Server is running on port " + port + "...")
+	if err := http.ListenAndServe(port, a.router); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -73,4 +79,16 @@ func registerRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
 	// Register auth-related routes from the auth package
 	auth.RegisterRoutes(router, db)
 	secret.RegisterRoutes(router, db, config)
+}
+
+// Main entry point
+func main() {
+	app, err := NewApp(".env")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer app.closeDatabase()
+
+	// Start the server
+	app.startServer(":8080")
 }
