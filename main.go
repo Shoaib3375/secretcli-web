@@ -8,7 +8,7 @@ import (
 
 // Main entry point
 func main() {
-	app, err := cmd.NewApp(".env.test")
+	app, err := cmd.NewApp(".env")
 	if err != nil {
 		log.Fatal(err)
 	}

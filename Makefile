@@ -1,4 +1,4 @@
-.PHONY: up down logs db-up db-down prometheus-logs create-db drop-db
+.PHONY: up down logs db-up db-down prometheus-logs create-db drop-db run-app run-test
 
 # Define service names
 DB_SERVICE_NAME=db
@@ -35,3 +35,9 @@ create-db:
 # Command to drop the PostgreSQL database
 drop-db:
 	docker-compose exec $(DB_SERVICE_NAME) psql -U admin -c "DROP DATABASE secretcli;"
+
+run-app:
+	go run main.go
+
+run-test:
+	go test ./tests/...
