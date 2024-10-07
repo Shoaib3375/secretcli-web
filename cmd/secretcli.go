@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -23,7 +22,6 @@ type App struct {
 
 // NewApp initializes a new App instance
 func NewApp(configFile string) (*App, error) {
-	fmt.Println(configFile)
 	cfg := loadConfig(configFile)
 	db := connectDatabase(cfg)
 

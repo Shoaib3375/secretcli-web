@@ -13,10 +13,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const testConfigPath = "./../../.env.test"
+
 // TestUserRegistration tests the user registration endpoint
 func TestUserRegistration(t *testing.T) {
 	// Initialize the application
-	app, err := cmd.NewApp(".env.test")
+	app, err := cmd.NewApp(testConfigPath)
 	assert.NoError(t, err)
 	defer app.CloseDatabase()
 
@@ -56,7 +58,7 @@ func TestUserRegistration(t *testing.T) {
 // TestUserLogin tests the user login endpoint
 func TestUserLogin(t *testing.T) {
 	// Initialize the application
-	app, err := cmd.NewApp(".env.test")
+	app, err := cmd.NewApp(testConfigPath)
 	assert.NoError(t, err)
 	defer app.CloseDatabase()
 
