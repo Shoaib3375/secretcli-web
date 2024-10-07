@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-chi/chi"
 	_ "github.com/lib/pq" // Import Postgres driver
-	"github.com/mahinops/secretcli-web/app/auth"
-	"github.com/mahinops/secretcli-web/app/secret"
-	"github.com/mahinops/secretcli-web/utils/database"
+	"github.com/mahinops/secretcli-web/internal/app/auth"
+	"github.com/mahinops/secretcli-web/internal/app/secret"
+	"github.com/mahinops/secretcli-web/internal/utils/database"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gorm.io/gorm"
 )

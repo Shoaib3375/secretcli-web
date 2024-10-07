@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/mahinops/secretcli-web/internal/utils/crypto"
 	"github.com/mahinops/secretcli-web/model"
-	"github.com/mahinops/secretcli-web/utils/crypto"
 )
 
 type AuthService struct {

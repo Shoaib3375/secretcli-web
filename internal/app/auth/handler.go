@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/mahinops/secretcli-web/internal/utils/auth"
 	"github.com/mahinops/secretcli-web/model"
-	"github.com/mahinops/secretcli-web/utils/auth"
 )
 
 type AuthHandler struct {

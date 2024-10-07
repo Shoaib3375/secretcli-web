@@ -2,7 +2,7 @@ package secret
 
 import (
 	"github.com/go-chi/chi"
-	"github.com/mahinops/secretcli-web/utils/database"
+	"github.com/mahinops/secretcli-web/internal/utils/database"
 	"gorm.io/gorm"
 )
 

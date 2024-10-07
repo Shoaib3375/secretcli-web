@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/mahinops/secretcli-web/internal/utils/auth"
+	"github.com/mahinops/secretcli-web/internal/utils/crypto"
+	"github.com/mahinops/secretcli-web/internal/utils/database"
 	"github.com/mahinops/secretcli-web/model"
-	"github.com/mahinops/secretcli-web/utils/auth"
-	"github.com/mahinops/secretcli-web/utils/crypto"
-	"github.com/mahinops/secretcli-web/utils/database"
 )
 
 type SecretHandler struct {
