@@ -1,6 +1,7 @@
-package main
+package cmd
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -15,13 +16,14 @@ import (
 
 // App holds the dependencies for the application
 type App struct {
-	router *chi.Mux
+	Router *chi.Mux
 	db     *gorm.DB
 	config *database.Config
 }
 
 // NewApp initializes a new App instance
 func NewApp(configFile string) (*App, error) {
+	fmt.Println(configFile)
 	cfg := loadConfig(configFile)
 	db := connectDatabase(cfg)
 
@@ -34,7 +36,7 @@ func NewApp(configFile string) (*App, error) {
 	// Register routes
 	registerRoutes(router, db, cfg)
 
-	return &App{router: router, db: db, config: cfg}, nil
+	return &App{Router: router, db: db, config: cfg}, nil
 }
 
 // Load configuration
@@ -56,7 +58,7 @@ func connectDatabase(cfg *database.Config) *gorm.DB {
 }
 
 // Close the database connection
-func (a *App) closeDatabase() {
+func (a *App) CloseDatabase() {
 	sqlDB, err := a.db.DB()
 	if err != nil {
 		log.Fatal(err)
@@ -67,9 +69,9 @@ func (a *App) closeDatabase() {
 }
 
 // Start the HTTP server
-func (a *App) startServer(port string) {
+func (a *App) StartServer(port string) {
 	log.Println("Server is running on port " + port + "...")
-	if err := http.ListenAndServe(port, a.router); err != nil {
+	if err := http.ListenAndServe(port, a.Router); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -79,16 +81,4 @@ func registerRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
 	// Register auth-related routes from the auth package
 	auth.RegisterRoutes(router, db)
 	secret.RegisterRoutes(router, db, config)
-}
-
-// Main entry point
-func main() {
-	app, err := NewApp(".env")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer app.closeDatabase()
-
-	// Start the server
-	app.startServer(":8080")
 }
