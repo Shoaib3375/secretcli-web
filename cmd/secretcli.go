@@ -33,7 +33,7 @@ func main() {
 
 // Load configuration
 func loadConfig() *database.Config {
-	cfg, err := database.LoadConfig()
+	cfg, err := database.LoadConfig(".env")
 	if err != nil {
 		log.Fatal("Error loading configuration: ", err)
 	}
