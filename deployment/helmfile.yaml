@@ -1,0 +1,14 @@
+{{ $app_name := env "APP_NAME" | default "secretcli-web"}}
+
+releases:
+- name: {{ $app_name }}-backend
+  namespace: {{ $app_name }}
+  labels:
+    component: app
+  chart: './charts'
+  version: 0.1.0
+  values:
+  - values/secretcli-web/values.yaml
+  set:
+    - name: "image.tag"
+      value: {{ requiredEnv "tag" }}

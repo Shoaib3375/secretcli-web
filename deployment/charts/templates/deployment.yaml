@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "secretcli-web.name" . }}-app
+  {{- include "secretcli-web.labels" . | nindent 2 }}
+    app: {{ template "secretcli-web.name" . }}
+spec:
+  {{- include "secretcli-web.selector" . | nindent 2 }}
+      name: {{ template "secretcli-web.name" . }}
+      component: app
+  template:
+    {{- include "secretcli-web.metadata" . | nindent 4 }}
+        name: {{ template "secretcli-web.name" . }}
+        component: app
+    spec:
+      containers:       
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.backendRepository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        {{- include "secretcli-web.envFrom" . | nindent 8 }}
+        ports:
+          - name: http
+            containerPort: 8080
+            protocol: TCP

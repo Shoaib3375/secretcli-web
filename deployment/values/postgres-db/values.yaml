@@ -1,0 +1,26 @@
+auth:
+  enablePostgresUser: true
+  postgresPassword: secret
+  password: secret
+  secretKeys:
+    adminPasswordKey: postgres-password
+    userPasswordKey: password
+  database: secretcli-web
+  username: admin
+
+primary:
+  persistence:
+    storageClass: hostpath
+    accessModes:
+    - ReadWriteOnce
+    size: 1Gi
+
+postgresqlDataDir: /bitnami/postgresql/data
+
+postgresqlConfiguration:
+  listenAddresses: '*'
+
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m

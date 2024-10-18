@@ -5,10 +5,10 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod vendor
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o secretcli ./cmd/secretcli.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o secretcli-web .
 
 # Start a new stage from scratch
 FROM alpine:latest
-COPY --from=builder /app/secretcli .
+COPY --from=builder /app/secretcli-web .
 EXPOSE 8080
-CMD ["./secretcli"]
+CMD ["./secretcli-web"]

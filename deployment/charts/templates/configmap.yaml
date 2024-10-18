@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: {{ template "secretcli-web.name" . }}-configmap
+  {{- include "secretcli-web.labels" . | nindent 2 }}
+    app: {{ template "secretcli-web.name" . }}
+
+data:
+  DB_HOST: {{ .Values.database.host | quote }}
+  DB_PORT: {{ .Values.database.port | quote }}
+  DB_USER: {{ .Values.database.username | quote }}
+  DB_PASSWORD: {{ .Values.database.password | quote }}
+  DB_NAME: {{ .Values.database.name | quote }}
+  PGPASSWORD: {{ .Values.database.password | quote }}
+  ENCRYPTION_KEY: {{ .Values.application.encryption_key | quote }}
