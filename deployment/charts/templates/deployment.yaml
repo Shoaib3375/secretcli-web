@@ -4,6 +4,10 @@ metadata:
   name: {{ template "secretcli-web.name" . }}-app
   {{- include "secretcli-web.labels" . | nindent 2 }}
     app: {{ template "secretcli-web.name" . }}
+  annotations:
+      # Use a hash of the ConfigMap to trigger a redeployment when it changes
+      configmap-hash: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      values-hash: {{ .Values | toJson | sha256sum }} 
 spec:
   replicas: {{ .Values.application.replicaCount }}
   {{- include "secretcli-web.selector" . | nindent 2 }}
