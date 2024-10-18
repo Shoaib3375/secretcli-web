@@ -3,6 +3,8 @@
 repositories:
 - name: bitnami
   url: https://charts.bitnami.com/bitnami
+- name: prometheus-community
+  url: https://prometheus-community.github.io/helm-charts
 
 releases:
 - name: postgresql
@@ -11,3 +13,10 @@ releases:
   version: "12.1.2"
   values:
   - values/postgres-db/values.yaml
+
+- name: prometheus
+  namespace: monitoring
+  chart: prometheus-community/prometheus
+  version: 25.16.0
+  values:
+  - values/prometheus/values.yaml
