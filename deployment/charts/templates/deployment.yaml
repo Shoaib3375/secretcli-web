@@ -5,9 +5,16 @@ metadata:
   {{- include "secretcli-web.labels" . | nindent 2 }}
     app: {{ template "secretcli-web.name" . }}
 spec:
+  replicas: {{ .Values.application.replicaCount }}
   {{- include "secretcli-web.selector" . | nindent 2 }}
       name: {{ template "secretcli-web.name" . }}
       component: app
+  strategy:
+    type: {{ .Values.updateStrategy.type }}  # Use update strategy from values.yaml
+    rollingUpdate:
+      maxSurge: {{ .Values.updateStrategy.rollingUpdate.maxSurge }}  # Max surge Pods
+      maxUnavailable: {{ .Values.updateStrategy.rollingUpdate.maxUnavailable }}  # Max unavailable Pods
+
   template:
     {{- include "secretcli-web.metadata" . | nindent 4 }}
         name: {{ template "secretcli-web.name" . }}
@@ -22,3 +29,26 @@ spec:
           - name: http
             containerPort: 8080
             protocol: TCP
+
+        readinessProbe:  # Check if the application is ready to serve traffic
+          {{- if .Values.readinessProbe.enabled }}
+          httpGet:
+            path: {{ .Values.readinessProbe.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+        livenessProbe:  # Check if the application is still running
+          {{- if .Values.livenessProbe.enabled }}
+          httpGet:
+            path: {{ .Values.livenessProbe.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}

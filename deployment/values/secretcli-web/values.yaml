@@ -1,5 +1,33 @@
 application:
   encryption_key: your-32-byte-key-herefgfjgukrlfj
+  replicaCount: 3
+
+# Readiness probe configuration
+readinessProbe:
+  enabled: true # Enable or disable the readiness probe
+  path: /health # Endpoint for readiness check
+  initialDelaySeconds: 5 # Delay before starting to check readiness
+  periodSeconds: 10 # Frequency of checks
+  timeoutSeconds: 2 # Timeout for each check
+  successThreshold: 1 # Number of successful checks before marking as ready
+  failureThreshold: 3 # Number of failures before marking as not ready
+
+# Liveness probe configuration
+livenessProbe:
+  enabled: true # Enable or disable the liveness probe
+  path: /health # Endpoint for liveness check
+  initialDelaySeconds: 15 # Delay before starting to check liveness
+  periodSeconds: 20 # Frequency of checks
+  timeoutSeconds: 2 # Timeout for each check
+  successThreshold: 1 # Number of successful checks before marking as alive
+  failureThreshold: 3 # Number of failures before marking as dead
+
+# Update strategy configuration
+updateStrategy:
+  type: RollingUpdate # Options: RollingUpdate, Recreate
+  rollingUpdate:
+    maxSurge: 1 # Max number of Pods that can be created above the desired number of Pods
+    maxUnavailable: 1 # Max number of Pods that can be unavailable during the update
 
 
 database:

@@ -9,6 +9,7 @@ import (
 	"github.com/mahinops/secretcli-web/internal/app/auth"
 	"github.com/mahinops/secretcli-web/internal/app/secret"
 	"github.com/mahinops/secretcli-web/internal/utils/database"
+	"github.com/mahinops/secretcli-web/internal/utils/web/health"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gorm.io/gorm"
 )
@@ -76,6 +77,8 @@ func (a *App) StartServer(port string) {
 
 // Register application routes
 func registerRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
+	// Register health check route
+	router.Get("/health", health.Handler)
 	// Register auth-related routes from the auth package
 	auth.RegisterRoutes(router, db)
 	secret.RegisterRoutes(router, db, config)
