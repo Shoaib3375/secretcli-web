@@ -5,11 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - SecretCLI</title>
+  <script src="/static/js/registration.js" defer></script>
 </head>
 <body>
   <h1>Register</h1>
   
-  <form action="/auth/web/register-submit" method="POST">
+  <form id="registration-form" method="POST">
     <div>
       <label for="name">Name:</label>
       <input type="text" id="name" name="name" required>
@@ -24,17 +25,11 @@
       <label for="password">Password:</label>
       <input type="password" id="password" name="password" required>
     </div>
-
+  
     <div>
       <input type="submit" value="Register">
     </div>
   </form>
-
-  {{if .Error}}
-  <div style="color: red;">
-    <p>Error: {{.Error}}</p>
-  </div>
-  {{end}}
 
   <p>Already have an account? <a href="/auth/web/login">Login here</a>.</p>
 </body>

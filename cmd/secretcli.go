@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	_ "github.com/lib/pq" // Import Postgres driver
 	"github.com/mahinops/secretcli-web/internal/app/auth"
 	"github.com/mahinops/secretcli-web/internal/app/secret"
@@ -29,13 +30,29 @@ func NewApp(configFile, mode string) (*App, error) {
 
 	// Create a new router
 	router := chi.NewRouter()
-	// Initialize the template renderer with the path to your templates
-	renderer := tmplrndr.NewRenderer("templates/**/*.tmpl")
+
+	// CORS configuration
+	corsOptions := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8081"}, // Allow your frontend origin
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type"},
+		ExposedHeaders:   []string{"Authorization"},
+		AllowCredentials: true,
+	})
+
+	// Use CORS middleware
+	router.Use(corsOptions.Handler)
 
 	if mode == "api" {
 		// Register API-specific routes
 		registerAPIRoutes(router, db, cfg)
 	} else if mode == "web" {
+		// Initialize the template renderer with the path to your templates
+		renderer := tmplrndr.NewRenderer("templates/**/*.tmpl")
+
+		// Serve static files from the "static" directory
+		router.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
 		// Register Web-specific routes
 		registerWebRoutes(router, db, renderer)
 	}

@@ -60,7 +60,7 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*model
 
 	// Update last login time and set new expiry
 	user.LastAuth = time.Now()
-	user.Expiry = time.Now().Add(24 * time.Hour)
+	user.Expiry = time.Now().Add(1 * time.Hour)
 
 	// Update the last authentication time and expiry in the database
 	if err := s.repo.UpdateLastAuth(ctx, user.ID, user.LastAuth); err != nil {

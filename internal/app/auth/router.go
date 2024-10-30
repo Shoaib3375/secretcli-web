@@ -30,8 +30,6 @@ func RegisterWebRoutes(router chi.Router, db *gorm.DB, renderer *tmplrndr.Render
 	// Define auth-related routes
 	router.Route("/auth/web", func(r chi.Router) {
 		r.Get("/register", authHandler.RegisterUserForm)
-		r.Post("/register-submit", authHandler.RegisterUserSubmit)
 		r.Get("/login", authHandler.LoginUserForm)
-		r.Post("/login-submit", authHandler.LoginUserSubmit)
 	})
 }
