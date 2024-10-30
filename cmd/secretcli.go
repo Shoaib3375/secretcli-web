@@ -37,7 +37,7 @@ func NewApp(configFile, mode string) (*App, error) {
 		registerAPIRoutes(router, db, cfg)
 	} else if mode == "web" {
 		// Register Web-specific routes
-		registerWebRoutes(router, renderer)
+		registerWebRoutes(router, db, renderer)
 	}
 
 	return &App{Router: router, db: db, config: cfg}, nil
@@ -47,15 +47,17 @@ func NewApp(configFile, mode string) (*App, error) {
 func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
 	router.Handle("/metrics", promhttp.Handler())
 	router.Get("/health", health.Handler)
-	auth.RegisterRoutes(router, db)
+	auth.RegisterAPIRoutes(router, db)
 	secret.RegisterRoutes(router, db, config)
 }
 
 // registerWebRoutes registers only Web routes, including template rendering
-func registerWebRoutes(router *chi.Mux, renderer *tmplrndr.Renderer) {
+func registerWebRoutes(router *chi.Mux, db *gorm.DB, renderer *tmplrndr.Renderer) {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		renderer.Render(w, "index", nil) // Use the renderer instance
 	})
+
+	auth.RegisterWebRoutes(router, db, renderer)
 }
 
 // Load configuration
