@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 
@@ -9,6 +8,7 @@ import (
 	_ "github.com/lib/pq" // Import Postgres driver
 	"github.com/mahinops/secretcli-web/internal/app/auth"
 	"github.com/mahinops/secretcli-web/internal/app/secret"
+	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/database"
 	"github.com/mahinops/secretcli-web/internal/utils/web/health"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -29,13 +29,15 @@ func NewApp(configFile, mode string) (*App, error) {
 
 	// Create a new router
 	router := chi.NewRouter()
+	// Initialize the template renderer with the path to your templates
+	renderer := tmplrndr.NewRenderer("templates/**/*.tmpl")
 
 	if mode == "api" {
 		// Register API-specific routes
 		registerAPIRoutes(router, db, cfg)
 	} else if mode == "web" {
 		// Register Web-specific routes
-		registerWebRoutes(router)
+		registerWebRoutes(router, renderer)
 	}
 
 	return &App{Router: router, db: db, config: cfg}, nil
@@ -50,16 +52,9 @@ func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
 }
 
 // registerWebRoutes registers only Web routes, including template rendering
-func registerWebRoutes(router *chi.Mux) {
-	tmpl, err := template.ParseFiles("templates/root/index.html")
-	if err != nil {
-		log.Fatal("Error loading template:", err)
-	}
-
+func registerWebRoutes(router *chi.Mux, renderer *tmplrndr.Renderer) {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		if err := tmpl.Execute(w, nil); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+		renderer.Render(w, "index", nil) // Use the renderer instance
 	})
 }
 
