@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 
@@ -22,20 +23,44 @@ type App struct {
 }
 
 // NewApp initializes a new App instance
-func NewApp(configFile string) (*App, error) {
+func NewApp(configFile, mode string) (*App, error) {
 	cfg := loadConfig(configFile)
 	db := connectDatabase(cfg)
 
 	// Create a new router
 	router := chi.NewRouter()
 
-	// Register Prometheus metrics endpoint (default system metrics)
-	router.Handle("/metrics", promhttp.Handler())
-
-	// Register routes
-	registerRoutes(router, db, cfg)
+	if mode == "api" {
+		// Register API-specific routes
+		registerAPIRoutes(router, db, cfg)
+	} else if mode == "web" {
+		// Register Web-specific routes
+		registerWebRoutes(router)
+	}
 
 	return &App{Router: router, db: db, config: cfg}, nil
+}
+
+// registerAPIRoutes registers only API routes
+func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
+	router.Handle("/metrics", promhttp.Handler())
+	router.Get("/health", health.Handler)
+	auth.RegisterRoutes(router, db)
+	secret.RegisterRoutes(router, db, config)
+}
+
+// registerWebRoutes registers only Web routes, including template rendering
+func registerWebRoutes(router *chi.Mux) {
+	tmpl, err := template.ParseFiles("templates/root/index.html")
+	if err != nil {
+		log.Fatal("Error loading template:", err)
+	}
+
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		if err := tmpl.Execute(w, nil); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
 }
 
 // Load configuration
@@ -67,19 +92,18 @@ func (a *App) CloseDatabase() {
 	}
 }
 
-// Start the HTTP server
-func (a *App) StartServer(port string) {
+// Start the HTTP API server
+func (a *App) StartAPIServer(port string) {
 	log.Println("Server is running on port " + port + "...")
 	if err := http.ListenAndServe(port, a.Router); err != nil {
 		log.Fatal(err)
 	}
 }
 
-// Register application routes
-func registerRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
-	// Register health check route
-	router.Get("/health", health.Handler)
-	// Register auth-related routes from the auth package
-	auth.RegisterRoutes(router, db)
-	secret.RegisterRoutes(router, db, config)
+// Start the HTTP Web server
+func (a *App) StartWebServer(port string) {
+	log.Println("Server is running on port " + port + "...")
+	if err := http.ListenAndServe(port, a.Router); err != nil {
+		log.Fatal(err)
+	}
 }
