@@ -23,6 +23,14 @@ func NewSecretHandler(service *SecretService, config *database.Config, renderer 
 	return &SecretHandler{service: service, config: config, renderer: renderer} // Update this line
 }
 
+func (h *SecretHandler) SecretCreateForm(w http.ResponseWriter, r *http.Request) {
+	if h.renderer == nil {
+		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
+		return
+	}
+	h.renderer.Render(w, "secrets.create.form", nil)
+}
+
 func (h *SecretHandler) SecretListTemplate(w http.ResponseWriter, r *http.Request) {
 	if h.renderer == nil {
 		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)

@@ -30,5 +30,6 @@ func RegisterWebRoutes(router chi.Router, db *gorm.DB, config *database.Config, 
 	// Define auth-related routes
 	router.Route("/secret/web", func(r chi.Router) {
 		r.Get("/list", secretHandler.SecretListTemplate)
+		r.Get("/create", secretHandler.SecretCreateForm)
 	})
 }
