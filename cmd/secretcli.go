@@ -35,7 +35,7 @@ func NewApp(configFile, mode string) (*App, error) {
 	corsOptions := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8081"}, // Allow your frontend origin
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"}, // Make sure to include any custom headers
 		ExposedHeaders:   []string{"Authorization"},
 		AllowCredentials: true,
 	})
@@ -54,7 +54,7 @@ func NewApp(configFile, mode string) (*App, error) {
 		router.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 		// Register Web-specific routes
-		registerWebRoutes(router, db, renderer)
+		registerWebRoutes(router, db, cfg, renderer)
 	}
 
 	return &App{Router: router, db: db, config: cfg}, nil
@@ -65,16 +65,17 @@ func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
 	router.Handle("/metrics", promhttp.Handler())
 	router.Get("/health", health.Handler)
 	auth.RegisterAPIRoutes(router, db)
-	secret.RegisterRoutes(router, db, config)
+	secret.RegisterAPIRoutes(router, db, config)
 }
 
 // registerWebRoutes registers only Web routes, including template rendering
-func registerWebRoutes(router *chi.Mux, db *gorm.DB, renderer *tmplrndr.Renderer) {
+func registerWebRoutes(router *chi.Mux, db *gorm.DB, config *database.Config, renderer *tmplrndr.Renderer) {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		renderer.Render(w, "index", nil) // Use the renderer instance
 	})
 
 	auth.RegisterWebRoutes(router, db, renderer)
+	secret.RegisterWebRoutes(router, db, config, renderer)
 }
 
 // Load configuration

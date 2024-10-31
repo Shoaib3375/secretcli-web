@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/auth"
 	"github.com/mahinops/secretcli-web/internal/utils/crypto"
 	"github.com/mahinops/secretcli-web/internal/utils/database"
@@ -12,13 +13,22 @@ import (
 )
 
 type SecretHandler struct {
-	service *SecretService
-	config  *database.Config
+	service  *SecretService
+	config   *database.Config
+	renderer *tmplrndr.Renderer
 }
 
 // NewSecretHandler creates a new instance of SecretHandler// NewSecretHandler creates a new instance of SecretHandler
-func NewSecretHandler(service *SecretService, config *database.Config) *SecretHandler {
-	return &SecretHandler{service: service, config: config} // Update this line
+func NewSecretHandler(service *SecretService, config *database.Config, renderer *tmplrndr.Renderer) *SecretHandler {
+	return &SecretHandler{service: service, config: config, renderer: renderer} // Update this line
+}
+
+func (h *SecretHandler) SecretListTemplate(w http.ResponseWriter, r *http.Request) {
+	if h.renderer == nil {
+		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
+		return
+	}
+	h.renderer.Render(w, "secrets.table", nil)
 }
 
 // Create handles the creation of a new secret
