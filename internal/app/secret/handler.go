@@ -87,6 +87,16 @@ func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Decrypt the passwords in the fetched secrets
+	for i := range secrets {
+		decryptedPassword, err := crypto.Decrypt(secrets[i].Password, []byte(h.config.EncryptionKey)) // Decrypt the password
+		if err != nil {
+			http.Error(w, "Error decrypting password: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		secrets[i].Password = decryptedPassword // Replace the encrypted password with the decrypted one
+	}
+
 	// Encode the response as JSON
 	w.WriteHeader(http.StatusOK) // Set the status to 200 OK
 	json.NewEncoder(w).Encode(secrets)

@@ -33,20 +33,50 @@ function populateSecretsTable(secrets) {
   // Loop through the secrets and create rows
   secrets.forEach(secret => {
     const row = document.createElement('tr');
+    row.classList.add('secret-row'); // Add class for styling
+
     row.innerHTML = `
-      <td>${secret.id}</td>
-      <td>${secret.title}</td>
-      <td>${secret.username}</td>
-      <td>${secret.password}</td>
-      <td>${secret.note}</td>
-      <td>${secret.email}</td>
-      <td>${secret.website}</td>
-      <td>${secret.user_id}</td>
-      <td>${new Date(secret.created_at).toLocaleString()}</td>
-      <td>${secret.updated_at ? new Date(secret.updated_at).toLocaleString() : 'N/A'}</td>
+      <td class="secret-name" onclick="toggleDetails(this)">${secret.title}</td>
+      <td class="secret-details">
+        <div>
+          <strong>Username:</strong> ${secret.username} <br>
+          <strong>Password:</strong>
+          <span class="masked-password">********
+            <span class="reveal-password" onclick="togglePassword(event, '${secret.password}')">Show</span>
+          </span>
+          <br>
+          <strong>Note:</strong> ${secret.note} <br>
+          <strong>Email:</strong> ${secret.email} <br>
+          <strong>Website:</strong> ${secret.website} <br>
+          <strong>Created At:</strong> ${new Date(secret.created_at).toLocaleString()} <br>
+          <strong>Updated At:</strong> ${secret.updated_at ? new Date(secret.updated_at).toLocaleString() : 'N/A'}
+        </div>
+      </td>
     `;
+    
     tableBody.appendChild(row); // Append the new row to the table body
   });
+}
+
+// Function to toggle secret details visibility
+function toggleDetails(element) {
+  const row = element.closest('tr');
+  row.classList.toggle('active'); // Toggle the active class to show/hide details
+}
+
+// Function to toggle password visibility
+function togglePassword(event, password) {
+  event.stopPropagation(); // Prevent the event from bubbling up to the row click
+  const passwordSpan = event.target.parentElement; // Get the password span
+  
+  // Check if the password is currently masked
+  if (passwordSpan.innerHTML.includes("********")) {
+    // Show the password
+    passwordSpan.innerHTML = `${password} <span class="reveal-password" onclick="togglePassword(event, '${password}')">Hide</span>`;
+  } else {
+    // Hide the password
+    passwordSpan.innerHTML = `******** <span class="reveal-password" onclick="togglePassword(event, '${password}')">Show</span>`;
+  }
 }
 
 // Check login status before fetching secrets
