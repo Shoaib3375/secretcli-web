@@ -1,0 +1,30 @@
+/* General styles for the navbar */
+.navbar {
+  display: flex;
+  justify-content: space-around; /* Distribute links evenly */
+  padding: 10px; /* Add some padding */
+  background-color: #f0f0f0; /* Light grey background */
+  border-bottom: 2px solid #ccc; /* Bottom border */
+}
+
+/* Style for the links */
+.navbar a {
+  text-decoration: none; /* Remove underline */
+  color: #333; /* Dark grey text */
+  padding: 8px 16px; /* Padding for links */
+  border-radius: 4px; /* Rounded corners */
+}
+
+/* Change color on hover */
+.navbar a:hover {
+  background-color: #ddd; /* Darker grey on hover */
+  color: #000; /* Black text on hover */
+}
+
+/* Optional: Responsive design for smaller screens */
+@media (max-width: 600px) {
+  .navbar {
+      flex-direction: column; /* Stack links vertically on small screens */
+      align-items: center; /* Center items */
+  }
+}
