@@ -31,7 +31,10 @@ func Encrypt(plainText string, key []byte) (string, error) {
 
 // Decrypt decrypts a ciphertext string using AES
 func Decrypt(cipherText string, key []byte) (string, error) {
-	cipherTextBytes, _ := base64.StdEncoding.DecodeString(cipherText)
+	cipherTextBytes, err := base64.StdEncoding.DecodeString(cipherText)
+	if err != nil {
+		return "", err
+	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -50,4 +53,9 @@ func Decrypt(cipherText string, key []byte) (string, error) {
 	}
 
 	return string(plainText), nil
+}
+
+func IsValidBase64(s string) bool {
+	_, err := base64.StdEncoding.DecodeString(s)
+	return err == nil
 }

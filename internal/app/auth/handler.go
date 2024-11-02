@@ -37,36 +37,31 @@ func (h *AuthHandler) RegisterUserForm(w http.ResponseWriter, r *http.Request) {
 	}
 	h.renderer.Render(w, "auth.registration.form", nil)
 }
+func (h *AuthHandler) handleError(w http.ResponseWriter, code int, err error) {
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(model.ErrorResponse{
+		Code:    code,
+		Message: err.Error(),
+	})
+}
 
 func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	// Read the JSON payload
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
+		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	var user model.Auth
 	if err := crypto.ValidatePayload(data, &user); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
+		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	// Decode JSON into the struct after validation
 	if err := json.Unmarshal(data, &user); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
+		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -76,12 +71,7 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		if err.Error() == "email already exists" {
 			statusCode = http.StatusConflict
 		}
-
-		w.WriteHeader(statusCode)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    statusCode,
-			Message: err.Error(),
-		})
+		h.handleError(w, statusCode, err)
 		return
 	}
 
@@ -106,53 +96,33 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	// Read the JSON payload
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
+		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	var loginRequest UserLogin
 	if err := crypto.ValidatePayload(data, &loginRequest); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
+		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	// Decode JSON into the struct after validation
 	if err := json.Unmarshal(data, &loginRequest); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
+		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	// Authenticate the user
 	user, err := h.usecase.Login(r.Context(), loginRequest.Email, loginRequest.Password)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    http.StatusUnauthorized,
-			Message: err.Error(),
-		})
+		h.handleError(w, http.StatusUnauthorized, err)
 		return
 	}
 
 	// Generate a JWT token for the user
 	token, err := auth.GenerateToken(user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(model.ErrorResponse{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
-		})
+		h.handleError(w, http.StatusInternalServerError, err)
 		return
 	}
 
