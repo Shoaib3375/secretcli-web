@@ -16,9 +16,10 @@ var jwtSecret = []byte("your-secret-key")
 func GenerateToken(user *model.Auth) (string, error) {
 	// Create a new token object, specifying signing method and the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"email":   user.Email,
-		"exp":     time.Now().Add(time.Hour * 72).Unix(), // Token valid for 72 hours
+		"user_id":   user.ID,
+		"email":     user.Email,
+		"exp":       user.Expiry,
+		"last_auth": user.LastAuth,
 	})
 
 	// Sign the token with a secret key
@@ -55,13 +56,33 @@ func ValidateToken(r *http.Request) (*model.Auth, error) {
 	})
 
 	if err != nil || !token.Valid {
-		return nil, err // Return an error if the token is invalid
+		return nil, err
 	}
 
 	// Extract claims
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return nil, jwt.NewValidationError("invalid claims", jwt.ValidationErrorClaimsInvalid)
+	}
+
+	// Validate expiry
+	expiryStr, ok := claims["exp"].(string)
+	if !ok {
+		return nil, jwt.NewValidationError("invalid expiry claim", jwt.ValidationErrorClaimsInvalid)
+	}
+
+	// Parse the expiry time string
+	expiryTime, err := time.Parse(time.RFC3339, expiryStr)
+	if err != nil {
+		return nil, err
+	}
+	// Get the current time
+	currentTime := time.Now()
+
+	// Check if the token is still valid
+	// Check if the token is still valid
+	if currentTime.After(expiryTime) {
+		return nil, jwt.NewValidationError("token has expired", jwt.ValidationErrorExpired)
 	}
 
 	// Return user information from claims
