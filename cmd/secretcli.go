@@ -7,12 +7,14 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	_ "github.com/lib/pq" // Import Postgres driver
+	_ "github.com/mahinops/secretcli-web/docs"
 	"github.com/mahinops/secretcli-web/internal/app/auth"
 	"github.com/mahinops/secretcli-web/internal/app/secret"
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/database"
 	"github.com/mahinops/secretcli-web/internal/utils/web/health"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/gorm"
 )
 
@@ -62,6 +64,13 @@ func NewApp(configFile, mode string) (*App, error) {
 
 // registerAPIRoutes registers only API routes
 func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
+	// Enable Swagger UI
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"), // The url pointing to API definition
+		httpSwagger.DeepLinking(true),
+		httpSwagger.DocExpansion("none"),
+		httpSwagger.DomID("swagger-ui"),
+	))
 	router.Handle("/metrics", promhttp.Handler())
 	router.Get("/health", health.Handler)
 	auth.RegisterAPIRoutes(router, db)
