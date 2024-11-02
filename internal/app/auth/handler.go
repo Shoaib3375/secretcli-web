@@ -85,12 +85,15 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with a success message and the user's name
+	// Respond with a structured success response
 	w.WriteHeader(http.StatusCreated)
-	response := map[string]string{
-		"message": "User " + name + " created successfully",
-	}
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(model.SuccessResponse{
+		Code:    http.StatusCreated,
+		Message: "User created successfully",
+		Data: map[string]string{
+			"name": name,
+		},
+	})
 }
 
 // UserLogin is the structure for the login request body
@@ -153,10 +156,14 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with the generated token and expiry
+	// Respond with a structured success response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"token":  token,
-		"expiry": user.Expiry,
+	json.NewEncoder(w).Encode(model.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "Login successful",
+		Data: map[string]interface{}{
+			"token":  token,
+			"expiry": user.Expiry,
+		},
 	})
 }

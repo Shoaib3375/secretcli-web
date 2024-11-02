@@ -16,7 +16,7 @@ const (
 func GeneratePassword(length int, includeSymbols bool) (string, error) {
 
 	if length < 4 {
-		return "", errors.New("password length must be at least 3 characters")
+		return "", errors.New("password length must be at least 4 characters")
 	}
 	// Build character pool based on options
 	allChars := lowerLetters + upperLetters + numbers

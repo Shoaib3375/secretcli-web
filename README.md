@@ -9,7 +9,7 @@ curl -X POST http://localhost:8080/auth/api/register \
      -H "Content-Type: application/json" \
      -d '{
           "name": "Test User",
-          "email": "test4@example.com",
+          "email": "test5@example.com",
           "password": "test"
      }' 
 
@@ -79,7 +79,7 @@ curl -X POST http://localhost:8080/secret/api/generatepassword \
      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiZXhwIjoxNzMwNTg1NjAzLCJ1c2VyX2lkIjozOX0.4TQimAROxdk-_KdZLluz7hI32xzudGyi70GYe3-CYlQ" \
      -H "Content-Type: application/json" \
      -d '{
-          "length": 100,
+          "length": 10,
           "include_special_symbol": true
      }'
 ```
