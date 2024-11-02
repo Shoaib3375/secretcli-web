@@ -45,6 +45,18 @@ func (h *AuthHandler) handleError(w http.ResponseWriter, code int, err error) {
 	})
 }
 
+// RegisterUser handles user registration.
+//
+//	@Summary		Register a new user
+//	@Description	This endpoint allows a new user to register with a name, email and password.
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		model.SwaggerAuthRequest	true	"User registration payload"
+//	@Success		201		{object}	model.SuccessResponse
+//	@Failure		400		{object}	model.ErrorResponse
+//	@Failure		409		{object}	model.ErrorResponse
+//	@Router			/auth/api/register [post]
 func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	// Read the JSON payload
 	data, err := io.ReadAll(r.Body)
@@ -86,12 +98,18 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// UserLogin is the structure for the login request body
-type UserLogin struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
+// LoginUser handles user login.
+//
+//	@Summary		Login a user
+//	@Description	This endpoint allows a user to login with an email and password.
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		model.SwaggerUserLoginRequest	true	"User login payload"
+//	@Success		200		{object}	model.SuccessResponse
+//	@Failure		400		{object}	model.ErrorResponse
+//	@Failure		401		{object}	model.ErrorResponse
+//	@Router			/auth/api/login [post] // Update this to the correct login endpoint
 func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	// Read the JSON payload
 	data, err := io.ReadAll(r.Body)
@@ -100,7 +118,7 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var loginRequest UserLogin
+	var loginRequest model.UserLogin
 	if err := crypto.ValidatePayload(data, &loginRequest); err != nil {
 		h.handleError(w, http.StatusBadRequest, err)
 		return

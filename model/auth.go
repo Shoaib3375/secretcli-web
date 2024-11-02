@@ -16,6 +16,12 @@ type Auth struct {
 	UpdatedAt *time.Time `json:"updated_at"`
 }
 
+// UserLogin is the structure for the login request body
+type UserLogin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type AuthUsecase interface {
 	Create(ctx context.Context, user Auth) (string, error)
 	Login(ctx context.Context, email, password string) (*Auth, error)

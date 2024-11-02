@@ -1,4 +1,108 @@
+definitions:
+  model.ErrorResponse:
+    properties:
+      code:
+        description: Error code
+        type: integer
+      message:
+        description: Detailed error message
+        type: string
+    type: object
+  model.SuccessResponse:
+    properties:
+      code:
+        description: Status code
+        type: integer
+      data:
+        description: Optional data payload
+      message:
+        description: Success message
+        type: string
+    type: object
+  model.SwaggerAuthRequest:
+    description: Auth registration request payload
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      name:
+        example: John Doe
+        type: string
+      password:
+        example: secretpass123
+        type: string
+    type: object
+  model.SwaggerUserLoginRequest:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      password:
+        example: secretpass123
+        type: string
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /auth/api/login:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows a user to login with an email and password.
+      parameters:
+      - description: User login payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.SwaggerUserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Login a user
+      tags:
+      - auth
+  /auth/api/register:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows a new user to register with a name, email
+        and password.
+      parameters:
+      - description: User registration payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.SwaggerAuthRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - auth
 swagger: "2.0"
