@@ -141,6 +141,17 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /health:
+    get:
+      description: Check the health of the service.
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Health Check
+      tags:
+      - health
   /secret/api/create:
     post:
       consumes:

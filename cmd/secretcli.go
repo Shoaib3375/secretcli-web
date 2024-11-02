@@ -72,7 +72,7 @@ func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
 		httpSwagger.DomID("swagger-ui"),
 	))
 	router.Handle("/metrics", promhttp.Handler())
-	router.Get("/health", health.Handler)
+	router.Get("/health", health.HealthCheck)
 	auth.RegisterAPIRoutes(router, db)
 	secret.RegisterAPIRoutes(router, db, config)
 }
