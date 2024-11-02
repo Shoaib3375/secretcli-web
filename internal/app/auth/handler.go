@@ -2,12 +2,11 @@ package auth
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/auth"
-	"github.com/mahinops/secretcli-web/internal/utils/crypto"
+	"github.com/mahinops/secretcli-web/internal/utils/common"
 	"github.com/mahinops/secretcli-web/model"
 )
 
@@ -58,21 +57,8 @@ func (h *AuthHandler) handleError(w http.ResponseWriter, code int, err error) {
 //	@Failure		409		{object}	model.ErrorResponse
 //	@Router			/auth/api/register [post]
 func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	// Read the JSON payload
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
 	var user model.Auth
-	if err := crypto.ValidatePayload(data, &user); err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
-	// Decode JSON into the struct after validation
-	if err := json.Unmarshal(data, &user); err != nil {
+	if err := common.ParseAndValidatePayload(r, &user); err != nil {
 		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
@@ -87,14 +73,8 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with a structured success response
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(model.SuccessResponse{
-		Code:    http.StatusCreated,
-		Message: "User created successfully",
-		Data: map[string]string{
-			"name": name,
-		},
+	common.RespondWithSuccess(w, http.StatusCreated, "User created successfully", map[string]interface{}{
+		"name": name,
 	})
 }
 
@@ -111,26 +91,12 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 //	@Failure		401		{object}	model.ErrorResponse
 //	@Router			/auth/api/login [post] // Update this to the correct login endpoint
 func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	// Read the JSON payload
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
 	var loginRequest model.UserLogin
-	if err := crypto.ValidatePayload(data, &loginRequest); err != nil {
+	if err := common.ParseAndValidatePayload(r, &loginRequest); err != nil {
 		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	// Decode JSON into the struct after validation
-	if err := json.Unmarshal(data, &loginRequest); err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
-	// Authenticate the user
 	user, err := h.usecase.Login(r.Context(), loginRequest.Email, loginRequest.Password)
 	if err != nil {
 		h.handleError(w, http.StatusUnauthorized, err)
@@ -144,14 +110,8 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with a structured success response
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(model.SuccessResponse{
-		Code:    http.StatusOK,
-		Message: "Login successful",
-		Data: map[string]interface{}{
-			"token":  token,
-			"expiry": user.Expiry,
-		},
+	common.RespondWithSuccess(w, http.StatusOK, "Login successful", map[string]interface{}{
+		"token":  token,
+		"expiry": user.Expiry,
 	})
 }

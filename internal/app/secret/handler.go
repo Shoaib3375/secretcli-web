@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/auth"
+	"github.com/mahinops/secretcli-web/internal/utils/common"
 	"github.com/mahinops/secretcli-web/internal/utils/crypto"
 	"github.com/mahinops/secretcli-web/internal/utils/database"
 	"github.com/mahinops/secretcli-web/model"
@@ -72,22 +72,8 @@ func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Read and validate payload
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
-	// Validate and decode payload
 	var passwordReq model.GeneratePasswordRequest
-	if err := crypto.ValidatePayload(data, &passwordReq); err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
-	// Decode JSON into the struct after validation
-	if err := json.Unmarshal(data, &passwordReq); err != nil {
+	if err := common.ParseAndValidatePayload(r, &passwordReq); err != nil {
 		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
@@ -99,12 +85,8 @@ func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Respond with SuccessResponse
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(model.SuccessResponse{
-		Code:    http.StatusOK,
-		Message: "Password generated successfully",
-		Data:    map[string]string{"password": passwordGenerated},
+	common.RespondWithSuccess(w, http.StatusOK, "Password generated successfully", map[string]interface{}{
+		"password": passwordGenerated,
 	})
 }
 
@@ -130,20 +112,8 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Read and decode payload
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
 	var secret model.Secret
-	if err := crypto.ValidatePayload(data, &secret); err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
-	if err := json.Unmarshal(data, &secret); err != nil {
+	if err := common.ParseAndValidatePayload(r, &secret); err != nil {
 		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
@@ -161,6 +131,7 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 		h.handleError(w, http.StatusInternalServerError, err)
 		return
 	}
+
 	secret.CreatedAt = time.Now()
 	secret.UpdatedAt = &secret.CreatedAt
 	if err := h.service.Create(r.Context(), secret); err != nil {
@@ -168,12 +139,7 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with SuccessResponse
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(model.SuccessResponse{
-		Code:    http.StatusCreated,
-		Message: "Secret created successfully",
-	})
+	common.RespondWithSuccess(w, http.StatusCreated, "Secret created successfully", map[string]interface{}{})
 }
 
 // List handles the retrieval of user secrets.
@@ -218,12 +184,8 @@ func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
 		secrets[i].Password = decryptedPassword
 	}
 
-	// Respond with SuccessResponse
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(model.SuccessResponse{
-		Code:    http.StatusOK,
-		Message: "Secrets retrieved successfully",
-		Data:    secrets,
+	common.RespondWithSuccess(w, http.StatusOK, "Secrets retrieved successfully", map[string]interface{}{
+		"secrets": secrets,
 	})
 }
 
@@ -248,20 +210,9 @@ func (h *SecretHandler) SecretDetail(w http.ResponseWriter, r *http.Request) {
 		h.handleError(w, http.StatusUnauthorized, err)
 		return
 	}
-	// Read and decode payload
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
 
 	var secretDetail model.SecretDetail
-	if err := crypto.ValidatePayload(data, &secretDetail); err != nil {
-		h.handleError(w, http.StatusBadRequest, err)
-		return
-	}
-
-	if err := json.Unmarshal(data, &secretDetail); err != nil {
+	if err := common.ParseAndValidatePayload(r, &secretDetail); err != nil {
 		h.handleError(w, http.StatusBadRequest, err)
 		return
 	}
@@ -272,10 +223,7 @@ func (h *SecretHandler) SecretDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(model.SuccessResponse{
-		Code:    http.StatusOK,
-		Message: "Secrets retrieved successfully",
-		Data:    secret,
+	common.RespondWithSuccess(w, http.StatusOK, "Secrets detail retrieved successfully", map[string]interface{}{
+		"secret": secret,
 	})
 }
