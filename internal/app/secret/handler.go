@@ -94,7 +94,20 @@ func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request)
 	})
 }
 
-// Create handles the creation of a new secret
+// Create handles the creation of a new secret.
+//
+//	@Summary		Create a new secret
+//	@Description	This endpoint allows users to create a new secret with an encrypted password.
+//	@Tags			secrets
+//	@Accept			json
+//	@Produce		json
+//	@Param			Authorization	header		string						true	"Bearer token for authentication"
+//	@Param			secret			body		model.SwaggerSecretRequest	true	"Secret payload containing title, username, password, note, email, website, and user ID"
+//	@Success		201				{object}	model.SuccessResponse
+//	@Failure		400				{object}	model.ErrorResponse
+//	@Failure		401				{object}	model.ErrorResponse
+//	@Failure		500				{object}	model.ErrorResponse
+//	@Router			/secret/api/create [post]
 func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Authorization check
 	user, err := auth.ValidateToken(r)

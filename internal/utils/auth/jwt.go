@@ -38,8 +38,12 @@ func ValidateToken(r *http.Request) (*model.Auth, error) {
 		return nil, http.ErrNoCookie // Return an error if no token is found
 	}
 
-	// Split the token from the "Bearer" prefix
-	tokenString := strings.Split(bearerToken, " ")[1]
+	var tokenString string
+	if strings.HasPrefix(bearerToken, "Bearer ") {
+		tokenString = strings.Split(bearerToken, " ")[1]
+	} else {
+		tokenString = bearerToken
+	}
 
 	// Parse the token
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {

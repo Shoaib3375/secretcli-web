@@ -32,6 +32,27 @@ definitions:
         example: secretpass123
         type: string
     type: object
+  model.SwaggerSecretRequest:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      note:
+        example: This is my Facebook Password. Login korben na.
+        type: string
+      password:
+        example: mahin
+        type: string
+      title:
+        example: Facebook Credentials
+        type: string
+      username:
+        example: mokhlesur.mahin
+        type: string
+      website:
+        example: https://www.facebook.com/
+        type: string
+    type: object
   model.SwaggerUserLoginRequest:
     properties:
       email:
@@ -105,4 +126,45 @@ paths:
       summary: Register a new user
       tags:
       - auth
+  /secret/api/create:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint allows users to create a new secret with an encrypted
+        password.
+      parameters:
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Secret payload containing title, username, password, note, email,
+          website, and user ID
+        in: body
+        name: secret
+        required: true
+        schema:
+          $ref: '#/definitions/model.SwaggerSecretRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Create a new secret
+      tags:
+      - secrets
 swagger: "2.0"

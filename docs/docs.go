@@ -106,6 +106,65 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/secret/api/create": {
+            "post": {
+                "description": "This endpoint allows users to create a new secret with an encrypted password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "secrets"
+                ],
+                "summary": "Create a new secret",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token for authentication",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Secret payload containing title, username, password, note, email, website, and user ID",
+                        "name": "secret",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerSecretRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -153,6 +212,35 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "secretpass123"
+                }
+            }
+        },
+        "model.SwaggerSecretRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                },
+                "note": {
+                    "type": "string",
+                    "example": "This is my Facebook Password. Login korben na."
+                },
+                "password": {
+                    "type": "string",
+                    "example": "mahin"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Facebook Credentials"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "mokhlesur.mahin"
+                },
+                "website": {
+                    "type": "string",
+                    "example": "https://www.facebook.com/"
                 }
             }
         },
