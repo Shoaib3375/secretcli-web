@@ -41,76 +41,113 @@ func (h *SecretHandler) SecretListTemplate(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request) {
-	// Check If User is Authorized
-	user, err := auth.ValidateToken(r) // This function should return the user if authenticated
+	// Check if user is authorized
+	user, err := auth.ValidateToken(r)
 	if err != nil || user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	// Read the JSON payload
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Unable to read request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
-	// Validate the payload against GeneratePasswordRequest struct
+
+	// Validate and decode payload
 	var passwordReq model.GeneratePasswordRequest
 	if err := crypto.ValidatePayload(data, &passwordReq); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	// Decode JSON into the struct after validation
-	if err := json.Unmarshal(data, &passwordReq); err != nil {
-		http.Error(w, "Invalid input format", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	// Generate the password using the crypto package
+	// Generate the password
 	passwordGenerated, err := h.service.GeneratePassword(r.Context(), passwordReq.Length, passwordReq.IncludeSpecialSymbol)
 	if err != nil {
-		http.Error(w, "Error generating password: "+err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	// Return Generated Password
-	w.Write([]byte(passwordGenerated))
+	// Respond with the generated password
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"password": passwordGenerated,
+	})
 }
 
 // Create handles the creation of a new secret
 func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// Check If User is Authorized
-	user, err := auth.ValidateToken(r) // This function should return the user if authenticated
+	// Check if the user is authorized
+	user, err := auth.ValidateToken(r)
 	if err != nil || user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	// Read the JSON payload
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Unable to read request body", http.StatusBadRequest)
-		return
-	}
-	// Validate the payload against GeneratePasswordRequest struct
-	var secret model.Secret
-	if err := crypto.ValidatePayload(data, &secret); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	// Decode JSON into the struct after validation
-	if err := json.Unmarshal(data, &secret); err != nil {
-		http.Error(w, "Invalid input format", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	// Set UserID from the authenticated user
+	// Decode payload into the Secret struct
+	var secret model.Secret
+	if err := json.Unmarshal(data, &secret); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Assign the user ID from the authenticated user
 	secret.UserID = user.ID
 
-	// Encrypt the password before storing it
-	secret.Password, err = crypto.Encrypt(secret.Password, []byte(h.config.EncryptionKey)) // Use the key from config
+	// Check if essential fields are missing
+	if secret.Title == "" || secret.Password == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Encrypt the password before storing
+	secret.Password, err = crypto.Encrypt(secret.Password, []byte(h.config.EncryptionKey))
 	if err != nil {
-		http.Error(w, "Error encrypting password: "+err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -120,42 +157,59 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Call the service to create the secret
 	if err := h.service.Create(r.Context(), secret); err != nil {
-		http.Error(w, "Error creating secret: "+err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated) // Set the status to 201 Created
-	response := map[string]string{
-		"message": "Secret created successfully",
-	}
-	json.NewEncoder(w).Encode(response) // Encode the response as JSON
+	// Respond with a success message
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "secret created successfully",
+	})
 }
 
 func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
-
-	user, err := auth.ValidateToken(r) // This function should return the user if authenticated
+	// Check if user is authorized
+	user, err := auth.ValidateToken(r)
 	if err != nil || user == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: err.Error(),
+		})
 		return
 	}
 
+	// Fetch the list of secrets for the user
 	secrets, err := h.service.List(r.Context(), user.ID)
 	if err != nil {
-		http.Error(w, "Error fetching secrets: "+err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	// Decrypt the passwords in the fetched secrets
+	// Decrypt each secret's password
 	for i := range secrets {
-		decryptedPassword, err := crypto.Decrypt(secrets[i].Password, []byte(h.config.EncryptionKey)) // Decrypt the password
+		decryptedPassword, err := crypto.Decrypt(secrets[i].Password, []byte(h.config.EncryptionKey))
 		if err != nil {
-			http.Error(w, "Error decrypting password: "+err.Error(), http.StatusInternalServerError)
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(model.ErrorResponse{
+				Code:    http.StatusInternalServerError,
+				Message: err.Error(),
+			})
 			return
 		}
-		secrets[i].Password = decryptedPassword // Replace the encrypted password with the decrypted one
+		secrets[i].Password = decryptedPassword
 	}
 
-	// Encode the response as JSON
-	w.WriteHeader(http.StatusOK) // Set the status to 200 OK
+	// Respond with the list of decrypted secrets
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(secrets)
 }
