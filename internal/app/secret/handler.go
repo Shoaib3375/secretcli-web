@@ -50,6 +50,20 @@ func (h *SecretHandler) handleError(w http.ResponseWriter, code int, err error) 
 	})
 }
 
+// GeneratePassword handles the generation of a password
+//
+//	@Summary		Generate a secure password
+//	@Description	Generates a password based on provided parameters.
+//	@Tags			secrets
+//	@Accept			json
+//	@Produce		json
+//	@Param			Authorization	header		string									true	"Bearer <token>"
+//	@Param			body			body		model.SwaggerGeneratePasswordRequest	true	"Password generation parameters"
+//	@Success		200				{object}	model.SuccessResponse
+//	@Failure		400				{object}	model.ErrorResponse
+//	@Failure		401				{object}	model.ErrorResponse
+//	@Failure		500				{object}	model.ErrorResponse
+//	@Router			/secret/api/generatepassword [post]
 func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request) {
 	// Authorization check
 	user, err := auth.ValidateToken(r)

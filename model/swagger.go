@@ -20,3 +20,8 @@ type SwaggerSecretRequest struct {
 	Email    string `json:"email" example:"john@example.com"`
 	Website  string `json:"website" example:"https://www.facebook.com/"`
 }
+
+type SwaggerGeneratePasswordRequest struct {
+	Length               int  `json:"length" example:"8"`
+	IncludeSpecialSymbol bool `json:"include_special_symbol" example:"true"`
+}

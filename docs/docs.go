@@ -165,6 +165,65 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/secret/api/generatepassword": {
+            "post": {
+                "description": "Generates a password based on provided parameters.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "secrets"
+                ],
+                "summary": "Generate a secure password",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer \u003ctoken\u003e",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Password generation parameters",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerGeneratePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -212,6 +271,19 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "secretpass123"
+                }
+            }
+        },
+        "model.SwaggerGeneratePasswordRequest": {
+            "type": "object",
+            "properties": {
+                "include_special_symbol": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "length": {
+                    "type": "integer",
+                    "example": 8
                 }
             }
         },

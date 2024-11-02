@@ -32,6 +32,15 @@ definitions:
         example: secretpass123
         type: string
     type: object
+  model.SwaggerGeneratePasswordRequest:
+    properties:
+      include_special_symbol:
+        example: true
+        type: boolean
+      length:
+        example: 8
+        type: integer
+    type: object
   model.SwaggerSecretRequest:
     properties:
       email:
@@ -165,6 +174,45 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       summary: Create a new secret
+      tags:
+      - secrets
+  /secret/api/generatepassword:
+    post:
+      consumes:
+      - application/json
+      description: Generates a password based on provided parameters.
+      parameters:
+      - description: Bearer <token>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Password generation parameters
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.SwaggerGeneratePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Generate a secure password
       tags:
       - secrets
 swagger: "2.0"
