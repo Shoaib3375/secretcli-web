@@ -268,6 +268,65 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/secret/api/secretdetail": {
+            "post": {
+                "description": "Retrieves details of a specific secret associated with the authenticated user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "secrets"
+                ],
+                "summary": "Get Secret Details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer \u003ctoken\u003e",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "ID of the secret to retrieve",
+                        "name": "secret_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SwaggerSecretDetailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -328,6 +387,15 @@ const docTemplate = `{
                 "length": {
                     "type": "integer",
                     "example": 8
+                }
+            }
+        },
+        "model.SwaggerSecretDetailRequest": {
+            "type": "object",
+            "properties": {
+                "secret_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },

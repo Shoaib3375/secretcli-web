@@ -17,13 +17,11 @@ func NewSqlSecretRepository(db *gorm.DB) *SqlSecretRepository {
 	return &SqlSecretRepository{db: db}
 }
 
-// Create method for saving a secret to the database
 func (r *SqlSecretRepository) Create(ctx context.Context, secret model.Secret) error {
 	// Use the GORM Create method to insert the secret into the database
 	return r.db.Create(&secret).Error
 }
 
-// List method for retrieving all secrets from the database
 func (r *SqlSecretRepository) List(ctx context.Context, userID uint) ([]model.Secret, error) {
 	// Use the GORM Find method to retrieve all secrets from the database
 	var secrets []model.Secret
@@ -40,4 +38,12 @@ func (r *SqlSecretRepository) GeneratePassword(ctx context.Context, length int, 
 		return "", err
 	}
 	return passwordGenerated, nil
+}
+
+func (r *SqlSecretRepository) SecretDetail(ctx context.Context, userID uint, secretID int) (model.Secret, error) {
+	var secret model.Secret
+	if err := r.db.Where("user_id = ? AND id = ?", userID, secretID).First(&secret).Error; err != nil {
+		return model.Secret{}, err
+	}
+	return secret, nil
 }

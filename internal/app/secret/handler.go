@@ -226,3 +226,56 @@ func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
 		Data:    secrets,
 	})
 }
+
+// SecretDetail retrieves the details of a specific secret.
+//
+//	@Summary		Get Secret Details
+//	@Description	Retrieves details of a specific secret associated with the authenticated user.
+//	@Tags			secrets
+//	@Accept			json
+//	@Produce		json
+//	@Param			Authorization	header		string								true	"Bearer <token>"
+//	@Param			secret_id		body		model.SwaggerSecretDetailRequest	true	"ID of the secret to retrieve"
+//	@Success		200				{object}	model.SuccessResponse
+//	@Failure		400				{object}	model.ErrorResponse
+//	@Failure		401				{object}	model.ErrorResponse
+//	@Failure		500				{object}	model.ErrorResponse
+//	@Router			/secret/api/secretdetail [post]
+func (h *SecretHandler) SecretDetail(w http.ResponseWriter, r *http.Request) {
+	// Authorization check
+	user, err := auth.ValidateToken(r)
+	if err != nil || user == nil {
+		h.handleError(w, http.StatusUnauthorized, err)
+		return
+	}
+	// Read and decode payload
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		h.handleError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	var secretDetail model.SecretDetail
+	if err := crypto.ValidatePayload(data, &secretDetail); err != nil {
+		h.handleError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := json.Unmarshal(data, &secretDetail); err != nil {
+		h.handleError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	secret, err := h.service.SecretDetail(r.Context(), user.ID, secretDetail.SecretID)
+	if err != nil {
+		h.handleError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(model.SuccessResponse{
+		Code:    http.StatusOK,
+		Message: "Secrets retrieved successfully",
+		Data:    secret,
+	})
+}

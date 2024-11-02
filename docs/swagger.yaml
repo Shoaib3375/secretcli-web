@@ -41,6 +41,12 @@ definitions:
         example: 8
         type: integer
     type: object
+  model.SwaggerSecretDetailRequest:
+    properties:
+      secret_id:
+        example: 1
+        type: integer
+    type: object
   model.SwaggerSecretRequest:
     properties:
       email:
@@ -243,6 +249,46 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       summary: List user secrets
+      tags:
+      - secrets
+  /secret/api/secretdetail:
+    post:
+      consumes:
+      - application/json
+      description: Retrieves details of a specific secret associated with the authenticated
+        user.
+      parameters:
+      - description: Bearer <token>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID of the secret to retrieve
+        in: body
+        name: secret_id
+        required: true
+        schema:
+          $ref: '#/definitions/model.SwaggerSecretDetailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Get Secret Details
       tags:
       - secrets
 swagger: "2.0"

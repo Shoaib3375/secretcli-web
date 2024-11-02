@@ -25,3 +25,7 @@ type SwaggerGeneratePasswordRequest struct {
 	Length               int  `json:"length" example:"8"`
 	IncludeSpecialSymbol bool `json:"include_special_symbol" example:"true"`
 }
+
+type SwaggerSecretDetailRequest struct {
+	SecretID int `json:"secret_id" example:"1"`
+}

@@ -23,11 +23,16 @@ type GeneratePasswordRequest struct {
 	IncludeSpecialSymbol bool `json:"include_special_symbol"`
 }
 
+type SecretDetail struct {
+	SecretID int `json:"secret_id"`
+}
+
 // SecretUsecase interface defining methods related to secret use cases
 type SecretUsecase interface {
 	Create(ctx context.Context, secret Secret) error
 	List(ctx context.Context, userID uint) ([]Secret, error)
 	GeneratePassword(ctx context.Context, length int, includeSpecialSymbol bool) (string, error)
+	SecretDetail(ctx context.Context, userID uint, secretID int) (Secret, error)
 }
 
 // SecretRepository interface defining methods for interacting with the secret data storage
@@ -35,4 +40,5 @@ type SecretRepository interface {
 	Create(ctx context.Context, secret Secret) error
 	List(ctx context.Context, userID uint) ([]Secret, error)
 	GeneratePassword(ctx context.Context, length int, includeSpecialSymbol bool) (string, error)
+	SecretDetail(ctx context.Context, userID uint, secretID int) (Secret, error)
 }
