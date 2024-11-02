@@ -39,42 +39,58 @@ func (h *AuthHandler) RegisterUserForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
-
 	// Read the JSON payload
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Unable to read request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	var user model.Auth
 	if err := crypto.ValidatePayload(data, &user); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	// Decode JSON into the struct after validation
 	if err := json.Unmarshal(data, &user); err != nil {
-		http.Error(w, "Invalid input format", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	name, err := h.usecase.Create(r.Context(), user)
 	if err != nil {
+		statusCode := http.StatusInternalServerError
 		if err.Error() == "email already exists" {
-			http.Error(w, err.Error(), http.StatusConflict) // 409 Conflict for existing email
-			return
+			statusCode = http.StatusConflict
 		}
-		http.Error(w, "Error registering user: "+err.Error(), http.StatusInternalServerError)
+
+		w.WriteHeader(statusCode)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    statusCode,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	// Respond with a success message and the user's name
-	w.WriteHeader(http.StatusCreated) // Set the status to 201 Created
+	w.WriteHeader(http.StatusCreated)
 	response := map[string]string{
 		"message": "User " + name + " created successfully",
 	}
-	json.NewEncoder(w).Encode(response) // Encode the response as JSON
+	json.NewEncoder(w).Encode(response)
 }
 
 // UserLogin is the structure for the login request body
@@ -87,32 +103,53 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	// Read the JSON payload
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Unable to read request body", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	var loginRequest UserLogin
 	if err := crypto.ValidatePayload(data, &loginRequest); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	// Decode JSON into the struct after validation
 	if err := json.Unmarshal(data, &loginRequest); err != nil {
-		http.Error(w, "Invalid input format", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
 		return
 	}
-	// Use the login service to authenticate the user
+
+	// Authenticate the user
 	user, err := h.usecase.Login(r.Context(), loginRequest.Email, loginRequest.Password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusUnauthorized,
+			Message: err.Error(),
+		})
 		return
 	}
 
 	// Generate a JWT token for the user
-	token, err := auth.GenerateToken(user) // Reference the generateToken from utils/auth/jwt.go
+	token, err := auth.GenerateToken(user)
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(model.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: err.Error(),
+		})
 		return
 	}
 
@@ -120,6 +157,6 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"token":  token,
-		"expiry": user.Expiry, // Include the expiry time in the response
+		"expiry": user.Expiry,
 	})
 }
