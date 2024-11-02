@@ -176,6 +176,18 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// List handles the retrieval of user secrets.
+//
+//	@Summary		List user secrets
+//	@Description	This endpoint retrieves all secrets associated with the authenticated user.
+//	@Tags			secrets
+//	@Accept			json
+//	@Produce		json
+//	@Param			Authorization	header		string	true	"Bearer <token>"
+//	@Success		200				{object}	model.SuccessResponse
+//	@Failure		401				{object}	model.ErrorResponse
+//	@Failure		500				{object}	model.ErrorResponse
+//	@Router			/secret/api/list [get]
 func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
 	// Authorization check
 	user, err := auth.ValidateToken(r)
@@ -183,8 +195,6 @@ func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
 		h.handleError(w, http.StatusUnauthorized, err)
 		return
 	}
-	fmt.Println("user", user.ID, user.Name)
-
 	// Fetch secrets and decrypt passwords
 	secrets, err := h.service.List(r.Context(), user.ID)
 	if err != nil {

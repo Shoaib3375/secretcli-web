@@ -215,4 +215,34 @@ paths:
       summary: Generate a secure password
       tags:
       - secrets
+  /secret/api/list:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint retrieves all secrets associated with the authenticated
+        user.
+      parameters:
+      - description: Bearer <token>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: List user secrets
+      tags:
+      - secrets
 swagger: "2.0"
