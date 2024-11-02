@@ -93,3 +93,26 @@ curl -X POST http://localhost:8080/secret/api/generatepassword \
           "include_special_symbol": true
      }'
 ```
+
+### Get Secret Detail
+```
+curl -X 'POST' \
+  'http://localhost:8080/secret/api/secretdetail' \
+  -H 'accept: application/json' \
+  -H 'Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiZXhwIjoxNzMwNTg1NjAzLCJ1c2VyX2lkIjozOX0.4TQimAROxdk-_KdZLluz7hI32xzudGyi70GYe3-CYlQ' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "secret_id": 16
+}'
+```
+
+```
+curl -X 'POST' \
+  'http://localhost:8080/secret/api/secretdetail' \
+  -H 'accept: application/json' \
+  -H 'Authorization: <token>' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "secret_id": 16
+}'
+```
