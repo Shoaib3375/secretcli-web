@@ -18,6 +18,7 @@ func RegisterAPIRoutes(router chi.Router, db *gorm.DB, config *database.Config) 
 	router.Route("/secret/api", func(r chi.Router) {
 		r.Post("/create", secretHandler.Create)
 		r.Get("/list", secretHandler.List)
+		r.Post("/generatepassword", secretHandler.GeneratePassword)
 	})
 }
 

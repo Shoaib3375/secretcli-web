@@ -2,6 +2,7 @@ package secret
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -39,18 +40,67 @@ func (h *SecretHandler) SecretListTemplate(w http.ResponseWriter, r *http.Reques
 	h.renderer.Render(w, "secrets.table", nil)
 }
 
-// Create handles the creation of a new secret
-func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
-
+func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request) {
+	// Check If User is Authorized
 	user, err := auth.ValidateToken(r) // This function should return the user if authenticated
 	if err != nil || user == nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	// Read the JSON payload
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Unable to read request body", http.StatusBadRequest)
+		return
+	}
+	// Validate the payload against GeneratePasswordRequest struct
+	var passwordReq model.GeneratePasswordRequest
+	if err := crypto.ValidatePayload(data, &passwordReq); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Decode JSON into the struct after validation
+	if err := json.Unmarshal(data, &passwordReq); err != nil {
+		http.Error(w, "Invalid input format", http.StatusBadRequest)
+		return
+	}
+
+	// Generate the password using the crypto package
+	passwordGenerated, err := h.service.GeneratePassword(r.Context(), passwordReq.Length, passwordReq.IncludeSpecialSymbol)
+	if err != nil {
+		http.Error(w, "Error generating password: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return Generated Password
+	w.Write([]byte(passwordGenerated))
+}
+
+// Create handles the creation of a new secret
+func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
+	// Check If User is Authorized
+	user, err := auth.ValidateToken(r) // This function should return the user if authenticated
+	if err != nil || user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Read the JSON payload
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Unable to read request body", http.StatusBadRequest)
+		return
+	}
+	// Validate the payload against GeneratePasswordRequest struct
 	var secret model.Secret
-	if err := json.NewDecoder(r.Body).Decode(&secret); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+	if err := crypto.ValidatePayload(data, &secret); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Decode JSON into the struct after validation
+	if err := json.Unmarshal(data, &secret); err != nil {
+		http.Error(w, "Invalid input format", http.StatusBadRequest)
 		return
 	}
 

@@ -2,10 +2,12 @@ package auth
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/auth"
+	"github.com/mahinops/secretcli-web/internal/utils/crypto"
 	"github.com/mahinops/secretcli-web/model"
 )
 
@@ -37,9 +39,23 @@ func (h *AuthHandler) RegisterUserForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+
+	// Read the JSON payload
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Unable to read request body", http.StatusBadRequest)
+		return
+	}
+
 	var user model.Auth
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+	if err := crypto.ValidatePayload(data, &user); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Decode JSON into the struct after validation
+	if err := json.Unmarshal(data, &user); err != nil {
+		http.Error(w, "Invalid input format", http.StatusBadRequest)
 		return
 	}
 
@@ -68,13 +84,24 @@ type UserLogin struct {
 }
 
 func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	var loginRequest UserLogin
-	err := json.NewDecoder(r.Body).Decode(&loginRequest)
+	// Read the JSON payload
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		http.Error(w, "Unable to read request body", http.StatusBadRequest)
 		return
 	}
 
+	var loginRequest UserLogin
+	if err := crypto.ValidatePayload(data, &loginRequest); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Decode JSON into the struct after validation
+	if err := json.Unmarshal(data, &loginRequest); err != nil {
+		http.Error(w, "Invalid input format", http.StatusBadRequest)
+		return
+	}
 	// Use the login service to authenticate the user
 	user, err := h.usecase.Login(r.Context(), loginRequest.Email, loginRequest.Password)
 	if err != nil {

@@ -32,3 +32,8 @@ func (s *SecretService) List(ctx context.Context, userID uint) ([]model.Secret, 
 	// Call the repository to retrieve all secrets
 	return s.repo.List(ctx, userID)
 }
+
+func (s *SecretService) GeneratePassword(ctx context.Context, length int, includeSpecialSymbol bool) (string, error) {
+	// Call the repository to generate a password
+	return s.repo.GeneratePassword(ctx, length, includeSpecialSymbol)
+}

@@ -3,6 +3,7 @@ package secret
 import (
 	"context"
 
+	"github.com/mahinops/secretcli-web/internal/utils/crypto"
 	"github.com/mahinops/secretcli-web/model"
 	"gorm.io/gorm"
 )
@@ -30,4 +31,13 @@ func (r *SqlSecretRepository) List(ctx context.Context, userID uint) ([]model.Se
 		return nil, err
 	}
 	return secrets, nil
+}
+
+func (r *SqlSecretRepository) GeneratePassword(ctx context.Context, length int, includeSpecialSymbol bool) (string, error) {
+	// Generate the password using the crypto package
+	passwordGenerated, err := crypto.GeneratePassword(length, includeSpecialSymbol)
+	if err != nil {
+		return "", err
+	}
+	return passwordGenerated, nil
 }
