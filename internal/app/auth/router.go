@@ -1,8 +1,11 @@
 package auth
 
 import (
+	"time"
+
 	"github.com/go-chi/chi"
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
+	"github.com/mahinops/secretcli-web/internal/utils/middleware"
 	"gorm.io/gorm"
 )
 
@@ -13,8 +16,12 @@ func RegisterAPIRoutes(router chi.Router, db *gorm.DB) {
 	authService := NewAuthService(authRepo)
 	authHandler := NewAuthHandler(authService, nil)
 
+	// Define the rate limiter with a 5-second limit per request
+	rateLimiter := middleware.NewRateLimiter(5 * time.Second)
+
 	// Define auth-related routes
 	router.Route("/auth/api", func(r chi.Router) {
+		r.Use(rateLimiter.LimitMiddleware)
 		r.Post("/register", authHandler.RegisterUser)
 		r.Post("/login", authHandler.LoginUser)
 	})
