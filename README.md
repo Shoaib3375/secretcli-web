@@ -1,8 +1,14 @@
-# secretcli-web
+# SecretCLI-Web
 
+## Overview
+SecretCLI-Web is a web application for securely managing sensitive information, such as passwords, personal notes, and account details. It allows users to register, login, create, list, and retrieve secret entries, with additional features for generating secure passwords.
 
 ### Register User
----
+**Endpoint:** /auth/api/register
+
+**Method:** POST
+
+**Description:** Registers a new user in the system.
 
 ```
 curl -X POST http://localhost:8080/auth/api/register \
@@ -14,9 +20,13 @@ curl -X POST http://localhost:8080/auth/api/register \
      }' 
 
 ```
-
-### Login User
 ---
+### Login User
+**Endpoint:** /auth/api/login
+
+**Method:** POST
+
+**Description:** Authenticates an existing user and provides a token for session management.
 
 ```
 curl -X POST http://localhost:8080/auth/api/login \
@@ -27,9 +37,18 @@ curl -X POST http://localhost:8080/auth/api/login \
      }'
 ```
 
-
-### Create Secret
 ---
+### Create Secret
+**Endpoint:** /secret/api/create
+
+**Method:** POST
+
+**Description:** Creates a new secret entry. Requires an authentication token.
+
+### Headers:
+**Authorization:** Bearer \<token-here>
+
+**Content-Type:** application/json
 
 ```
 curl -X POST http://localhost:8080/secret/api/create \
@@ -59,10 +78,16 @@ curl -X POST http://localhost:8080/secret/api/create \
      }'
 ```
 
-
-### List Secret
 ---
+### List Secret
+**Endpoint:** /secret/api/list
 
+**Method:** GET
+
+**Description:** Retrieves a list of secrets for the authenticated user.
+
+### Headers:
+**Authorization:** Bearer \<token-here>
 ```
 curl -H "Authorization: Bearer <token-here>" -X GET http://localhost:8080/secret/api/list
 
@@ -71,8 +96,24 @@ curl -H "Authorization: Bearer <token-here>" -X GET http://localhost:8080/secret
 ```
 curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiZXhwIjoxNzMwNTg1Njc1LCJ1c2VyX2lkIjozOX0.Nxc41WUhK5nBTaQjRAVT8W6J2NY0JPAW0f7lVWRbt7Q" -X GET http://localhost:8080/secret/api/list
 ```
-
+---
 ### Generate Password
+**Endpoint:** /secret/api/generatepassword
+
+**Method:** POST
+
+**Description:** Generates a secure password with specified length and character options.
+
+### Headers:
+
+**Authorization:** Bearer \<token-here>
+
+**Content-Type:** application/json
+
+### Request Parameters:
+**length (int):** Desired password length.
+
+**include_special_symbol (bool):** Whether to include special symbols.
 
 ```
 curl -X POST http://localhost:8080/secret/api/generatepassword \
@@ -93,8 +134,22 @@ curl -X POST http://localhost:8080/secret/api/generatepassword \
           "include_special_symbol": true
      }'
 ```
-
+---
 ### Get Secret Detail
+**Endpoint:** /secret/api/secretdetail
+
+**Method:** POST
+
+**Description:** Retrieves detailed information of a specific secret by ID.
+
+### Headers:
+**Authorization:** Bearer \<token-here>
+
+**Content-Type:** application/json
+
+### Request Parameters:
+**secret_id (int):** ID of the secret to retrieve.
+
 ```
 curl -X 'POST' \
   'http://localhost:8080/secret/api/secretdetail' \
