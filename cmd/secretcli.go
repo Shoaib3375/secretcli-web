@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
+	"github.com/go-redis/redis/v8"
 	_ "github.com/lib/pq" // Import Postgres driver
 	_ "github.com/mahinops/secretcli-web/docs"
 	"github.com/mahinops/secretcli-web/internal/app/auth"
@@ -34,15 +33,6 @@ func NewApp(configFile, mode string) (*App, error) {
 	db := connectDatabase(cfg)
 	redisCfg := loadRedisConfig(configFile)
 	redisClient := redisconn.ConnectRedis(redisCfg)
-	fmt.Println(redisClient)
-	ctx := context.Background()
-
-	err := redisClient.Set(ctx, "name", "mahin", 0).Err()
-	if err != nil {
-		log.Fatalf("Failed to set data in Redis: %v", err)
-	} else {
-		fmt.Println("Data set in Redis: name -> mahin")
-	}
 
 	// Create a new router
 	router := chi.NewRouter()
@@ -61,7 +51,7 @@ func NewApp(configFile, mode string) (*App, error) {
 
 	if mode == "api" {
 		// Register API-specific routes
-		registerAPIRoutes(router, db, cfg)
+		registerAPIRoutes(router, db, cfg, redisClient)
 	} else if mode == "web" {
 		// Initialize the template renderer with the path to your templates
 		renderer := tmplrndr.NewRenderer("templates/**/*.tmpl")
@@ -77,7 +67,7 @@ func NewApp(configFile, mode string) (*App, error) {
 }
 
 // registerAPIRoutes registers only API routes
-func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
+func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config, redisClient *redis.Client) {
 	// Enable Swagger UI
 	router.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL("/swagger/doc.json"), // The url pointing to API definition
@@ -87,7 +77,7 @@ func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config) {
 	))
 	router.Handle("/metrics", promhttp.Handler())
 	router.Get("/health", health.HealthCheck)
-	auth.RegisterAPIRoutes(router, db)
+	auth.RegisterAPIRoutes(router, db, redisClient)
 	secret.RegisterAPIRoutes(router, db, config)
 }
 

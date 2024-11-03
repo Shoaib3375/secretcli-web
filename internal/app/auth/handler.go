@@ -3,7 +3,9 @@ package auth
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/go-redis/redis/v8"
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/auth"
 	"github.com/mahinops/secretcli-web/internal/utils/common"
@@ -11,12 +13,13 @@ import (
 )
 
 type AuthHandler struct {
-	usecase  model.AuthUsecase
-	renderer *tmplrndr.Renderer
+	usecase     model.AuthUsecase
+	renderer    *tmplrndr.Renderer
+	redisClient *redis.Client
 }
 
-func NewAuthHandler(usecase model.AuthUsecase, renderer *tmplrndr.Renderer) *AuthHandler {
-	return &AuthHandler{usecase: usecase, renderer: renderer}
+func NewAuthHandler(usecase model.AuthUsecase, renderer *tmplrndr.Renderer, redisClient *redis.Client) *AuthHandler {
+	return &AuthHandler{usecase: usecase, renderer: renderer, redisClient: redisClient}
 }
 
 // RegisterUserForm renders the registration form
@@ -109,6 +112,7 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		h.handleError(w, http.StatusInternalServerError, err)
 		return
 	}
+	h.redisClient.Set(r.Context(), token, user.Email, 1*time.Minute)
 
 	common.RespondWithSuccess(w, http.StatusOK, "Login successful", map[string]interface{}{
 		"token":  token,

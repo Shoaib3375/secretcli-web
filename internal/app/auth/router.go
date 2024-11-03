@@ -4,17 +4,18 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"github.com/go-redis/redis/v8"
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/middleware"
 	"gorm.io/gorm"
 )
 
 // RegisterRoutes registers the auth-related routes with the router.
-func RegisterAPIRoutes(router chi.Router, db *gorm.DB) {
+func RegisterAPIRoutes(router chi.Router, db *gorm.DB, redisClient *redis.Client) {
 	// Initialize repository, service, and handler for auth
 	authRepo := NewSqlAuthRepository(db)
 	authService := NewAuthService(authRepo)
-	authHandler := NewAuthHandler(authService, nil)
+	authHandler := NewAuthHandler(authService, nil, redisClient)
 
 	// Define the rate limiter with a 5-second limit per request
 	rateLimiter := middleware.NewRateLimiter(5 * time.Second)
@@ -32,7 +33,7 @@ func RegisterWebRoutes(router chi.Router, db *gorm.DB, renderer *tmplrndr.Render
 	// Initialize repository, service, and handler for auth
 	authRepo := NewSqlAuthRepository(db)
 	authService := NewAuthService(authRepo)
-	authHandler := NewAuthHandler(authService, renderer)
+	authHandler := NewAuthHandler(authService, renderer, nil)
 
 	// Define auth-related routes
 	router.Route("/auth/web", func(r chi.Router) {
