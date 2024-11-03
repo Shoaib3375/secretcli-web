@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/mahinops/secretcli-web/internal/app/secret"
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/database"
+	"github.com/mahinops/secretcli-web/internal/utils/redisconn"
 	"github.com/mahinops/secretcli-web/internal/utils/web/health"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -27,8 +30,19 @@ type App struct {
 
 // NewApp initializes a new App instance
 func NewApp(configFile, mode string) (*App, error) {
-	cfg := loadConfig(configFile)
+	cfg := loadDBConfig(configFile)
 	db := connectDatabase(cfg)
+	redisCfg := loadRedisConfig(configFile)
+	redisClient := redisconn.ConnectRedis(redisCfg)
+	fmt.Println(redisClient)
+	ctx := context.Background()
+
+	err := redisClient.Set(ctx, "name", "mahin", 0).Err()
+	if err != nil {
+		log.Fatalf("Failed to set data in Redis: %v", err)
+	} else {
+		fmt.Println("Data set in Redis: name -> mahin")
+	}
 
 	// Create a new router
 	router := chi.NewRouter()
@@ -88,12 +102,20 @@ func registerWebRoutes(router *chi.Mux, db *gorm.DB, config *database.Config, re
 }
 
 // Load configuration
-func loadConfig(configFile string) *database.Config {
+func loadDBConfig(configFile string) *database.Config {
 	cfg, err := database.LoadConfig(configFile)
 	if err != nil {
 		log.Fatal("Error loading configuration: ", err)
 	}
 	return cfg
+}
+
+func loadRedisConfig(configFile string) *redisconn.RedisConfig {
+	redisCfg, err := redisconn.LoadRedisConfig(configFile)
+	if err != nil {
+		log.Fatal("Error loading redis configuration: ", err)
+	}
+	return redisCfg
 }
 
 // Connect to the database
