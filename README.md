@@ -4,6 +4,8 @@
 SecretCLI-Web is a web application for securely managing sensitive information, such as passwords, personal notes, and account details. It allows users to register, login, create, list, and retrieve secret entries, with additional features for generating secure passwords.
 
 ### Register User
+<details>
+
 **Endpoint:** /auth/api/register
 
 **Method:** POST
@@ -20,8 +22,13 @@ curl -X POST http://localhost:8080/auth/api/register \
      }' 
 
 ```
+
+</details>
+
 ---
 ### Login User
+<details>
+
 **Endpoint:** /auth/api/login
 
 **Method:** POST
@@ -37,8 +44,12 @@ curl -X POST http://localhost:8080/auth/api/login \
      }'
 ```
 
+</details>
+
 ---
 ### Create Secret
+<details>
+
 **Endpoint:** /secret/api/create
 
 **Method:** POST
@@ -78,8 +89,12 @@ curl -X POST http://localhost:8080/secret/api/create \
      }'
 ```
 
+</details>
+
 ---
 ### List Secret
+<details>
+
 **Endpoint:** /secret/api/list
 
 **Method:** GET
@@ -96,8 +111,13 @@ curl -H "Authorization: Bearer <token-here>" -X GET http://localhost:8080/secret
 ```
 curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QxQGV4YW1wbGUuY29tIiwiZXhwIjoxNzMwNTg1Njc1LCJ1c2VyX2lkIjozOX0.Nxc41WUhK5nBTaQjRAVT8W6J2NY0JPAW0f7lVWRbt7Q" -X GET http://localhost:8080/secret/api/list
 ```
+
+</details>
+
 ---
 ### Generate Password
+<details>
+
 **Endpoint:** /secret/api/generatepassword
 
 **Method:** POST
@@ -134,8 +154,13 @@ curl -X POST http://localhost:8080/secret/api/generatepassword \
           "include_special_symbol": true
      }'
 ```
+
+</details>
+
 ---
 ### Get Secret Detail
+<details>
+
 **Endpoint:** /secret/api/secretdetail
 
 **Method:** POST
@@ -171,3 +196,6 @@ curl -X 'POST' \
   "secret_id": 16
 }'
 ```
+</details>
+
+---
