@@ -12,18 +12,15 @@ type SqlSecretRepository struct {
 	db *gorm.DB
 }
 
-// NewSqlSecretRepository creates a new instance of SqlSecretRepository
 func NewSqlSecretRepository(db *gorm.DB) *SqlSecretRepository {
 	return &SqlSecretRepository{db: db}
 }
 
 func (r *SqlSecretRepository) Create(ctx context.Context, secret model.Secret) error {
-	// Use the GORM Create method to insert the secret into the database
 	return r.db.Create(&secret).Error
 }
 
 func (r *SqlSecretRepository) List(ctx context.Context, userID uint) ([]model.Secret, error) {
-	// Use the GORM Find method to retrieve all secrets from the database
 	var secrets []model.Secret
 	if err := r.db.Where("user_id = ?", userID).Find(&secrets).Error; err != nil {
 		return nil, err
@@ -32,7 +29,6 @@ func (r *SqlSecretRepository) List(ctx context.Context, userID uint) ([]model.Se
 }
 
 func (r *SqlSecretRepository) GeneratePassword(ctx context.Context, length int, includeSpecialSymbol bool) (string, error) {
-	// Generate the password using the crypto package
 	passwordGenerated, err := crypto.GeneratePassword(length, includeSpecialSymbol)
 	if err != nil {
 		return "", err

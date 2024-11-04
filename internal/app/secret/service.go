@@ -11,13 +11,11 @@ type SecretService struct {
 	repo model.SecretRepository
 }
 
-// NewSecretService creates a new instance of SecretService
 func NewSecretService(repo model.SecretRepository) *SecretService {
 	return &SecretService{repo: repo}
 }
 
 func (s *SecretService) Create(ctx context.Context, secret model.Secret) error {
-	// Validate input
 	if secret.Title == "" || secret.Password == "" {
 		return errors.New("title and password cannot be empty")
 	}
@@ -29,7 +27,6 @@ func (s *SecretService) List(ctx context.Context, userID uint) ([]model.Secret, 
 }
 
 func (s *SecretService) GeneratePassword(ctx context.Context, length int, includeSpecialSymbol bool) (string, error) {
-	// Call the repository to generate a password
 	return s.repo.GeneratePassword(ctx, length, includeSpecialSymbol)
 }
 

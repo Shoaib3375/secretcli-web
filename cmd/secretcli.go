@@ -6,35 +6,28 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
-	"github.com/go-redis/redis/v8"
 	_ "github.com/lib/pq" // Import Postgres driver
 	_ "github.com/mahinops/secretcli-web/docs"
-	"github.com/mahinops/secretcli-web/internal/app/auth"
-	"github.com/mahinops/secretcli-web/internal/app/secret"
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
+	"github.com/mahinops/secretcli-web/internal/utils/common"
 	"github.com/mahinops/secretcli-web/internal/utils/database"
-	"github.com/mahinops/secretcli-web/internal/utils/health"
 	"github.com/mahinops/secretcli-web/internal/utils/redisconn"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	httpSwagger "github.com/swaggo/http-swagger"
 	"gorm.io/gorm"
 )
 
-// App holds the dependencies for the application
 type App struct {
-	Router *chi.Mux
-	db     *gorm.DB
-	config *database.Config
+	Router       *chi.Mux
+	db           *gorm.DB
+	commonConfig *common.CommonConfig
 }
 
-// NewApp initializes a new App instance
 func NewApp(configFile, mode string) (*App, error) {
 	cfg := loadDBConfig(configFile)
 	db := connectDatabase(cfg)
 	redisCfg := loadRedisConfig(configFile)
 	redisClient := redisconn.ConnectRedis(redisCfg)
+	commonCfg := loadCommonConfig(configFile)
 
-	// Create a new router
 	router := chi.NewRouter()
 
 	// CORS configuration
@@ -50,48 +43,15 @@ func NewApp(configFile, mode string) (*App, error) {
 	router.Use(corsOptions.Handler)
 
 	if mode == "api" {
-		// Register API-specific routes
-		registerAPIRoutes(router, db, cfg, redisClient)
+		RegisterAPIRoutes(router, db, commonCfg, redisClient)
 	} else if mode == "web" {
-		// Initialize the template renderer with the path to your templates
 		renderer := tmplrndr.NewRenderer("templates/**/*.tmpl")
-
-		// Serve static files from the "static" directory
 		router.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
-		// Register Web-specific routes
-		registerWebRoutes(router, db, cfg, renderer)
+		RegisterWebRoutes(router, db, commonCfg, renderer)
 	}
-
-	return &App{Router: router, db: db, config: cfg}, nil
+	return &App{Router: router, db: db, commonConfig: commonCfg}, nil
 }
 
-// registerAPIRoutes registers only API routes
-func registerAPIRoutes(router *chi.Mux, db *gorm.DB, config *database.Config, redisClient *redis.Client) {
-	// Enable Swagger UI
-	router.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("/swagger/doc.json"), // The url pointing to API definition
-		httpSwagger.DeepLinking(true),
-		httpSwagger.DocExpansion("none"),
-		httpSwagger.DomID("swagger-ui"),
-	))
-	router.Handle("/metrics", promhttp.Handler())
-	router.Get("/health", health.HealthCheck)
-	auth.RegisterAPIRoutes(router, db, redisClient)
-	secret.RegisterAPIRoutes(router, db, config)
-}
-
-// registerWebRoutes registers only Web routes, including template rendering
-func registerWebRoutes(router *chi.Mux, db *gorm.DB, config *database.Config, renderer *tmplrndr.Renderer) {
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		renderer.Render(w, "index", nil) // Use the renderer instance
-	})
-
-	auth.RegisterWebRoutes(router, db, renderer)
-	secret.RegisterWebRoutes(router, db, config, renderer)
-}
-
-// Load configuration
 func loadDBConfig(configFile string) *database.Config {
 	cfg, err := database.LoadConfig(configFile)
 	if err != nil {
@@ -108,7 +68,14 @@ func loadRedisConfig(configFile string) *redisconn.RedisConfig {
 	return redisCfg
 }
 
-// Connect to the database
+func loadCommonConfig(configFile string) *common.CommonConfig {
+	commonCfg, err := common.LoadCommonConfig(configFile)
+	if err != nil {
+		log.Fatal("Error loading common configuration: ", err)
+	}
+	return commonCfg
+}
+
 func connectDatabase(cfg *database.Config) *gorm.DB {
 	db, err := database.Connect(cfg)
 	if err != nil {
@@ -117,7 +84,6 @@ func connectDatabase(cfg *database.Config) *gorm.DB {
 	return db
 }
 
-// Close the database connection
 func (a *App) CloseDatabase() {
 	sqlDB, err := a.db.DB()
 	if err != nil {
@@ -125,21 +91,5 @@ func (a *App) CloseDatabase() {
 	}
 	if err := sqlDB.Close(); err != nil {
 		log.Fatal("Error closing database: ", err)
-	}
-}
-
-// Start the HTTP API server
-func (a *App) StartAPIServer(port string) {
-	log.Println("Server is running on port " + port + "...")
-	if err := http.ListenAndServe(port, a.Router); err != nil {
-		log.Fatal(err)
-	}
-}
-
-// Start the HTTP Web server
-func (a *App) StartWebServer(port string) {
-	log.Println("Server is running on port " + port + "...")
-	if err := http.ListenAndServe(port, a.Router); err != nil {
-		log.Fatal(err)
 	}
 }

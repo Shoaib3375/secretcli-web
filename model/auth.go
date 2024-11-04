@@ -24,7 +24,7 @@ type UserLogin struct {
 
 type AuthUsecase interface {
 	Create(ctx context.Context, user Auth) (string, error)
-	Login(ctx context.Context, email, password string) (*Auth, error)
+	Login(ctx context.Context, email, password string, JWTExpiryDuration time.Duration) (*Auth, error)
 }
 
 type AuthRepository interface {
@@ -32,5 +32,5 @@ type AuthRepository interface {
 	EmailExists(ctx context.Context, email string) (bool, error)
 	GetByEmail(ctx context.Context, email string) (*Auth, error)
 	UpdateLastAuth(ctx context.Context, userID uint) error
-	UpdateExpiry(ctx context.Context, id uint) error
+	UpdateExpiry(ctx context.Context, id uint, JWTExpiryDuration time.Duration) error
 }

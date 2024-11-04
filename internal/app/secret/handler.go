@@ -11,19 +11,18 @@ import (
 	"github.com/mahinops/secretcli-web/internal/utils/auth"
 	"github.com/mahinops/secretcli-web/internal/utils/common"
 	"github.com/mahinops/secretcli-web/internal/utils/crypto"
-	"github.com/mahinops/secretcli-web/internal/utils/database"
 	"github.com/mahinops/secretcli-web/model"
 )
 
 type SecretHandler struct {
-	service  *SecretService
-	config   *database.Config
-	renderer *tmplrndr.Renderer
+	service      *SecretService
+	commonConfig *common.CommonConfig
+	renderer     *tmplrndr.Renderer
 }
 
 // NewSecretHandler creates a new instance of SecretHandler// NewSecretHandler creates a new instance of SecretHandler
-func NewSecretHandler(service *SecretService, config *database.Config, renderer *tmplrndr.Renderer) *SecretHandler {
-	return &SecretHandler{service: service, config: config, renderer: renderer} // Update this line
+func NewSecretHandler(service *SecretService, commonConfig *common.CommonConfig, renderer *tmplrndr.Renderer) *SecretHandler {
+	return &SecretHandler{service: service, commonConfig: commonConfig, renderer: renderer} // Update this line
 }
 
 func (h *SecretHandler) SecretCreateForm(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +65,7 @@ func (h *SecretHandler) handleError(w http.ResponseWriter, code int, err error) 
 //	@Router			/secret/api/generatepassword [post]
 func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request) {
 	// Authorization check
-	user, err := auth.ValidateToken(r)
+	user, err := auth.ValidateToken(r, h.commonConfig.JWTSecretKey)
 	if err != nil || user == nil {
 		h.handleError(w, http.StatusUnauthorized, err)
 		return
@@ -78,7 +77,6 @@ func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Generate password
 	passwordGenerated, err := h.service.GeneratePassword(r.Context(), passwordReq.Length, passwordReq.IncludeSpecialSymbol)
 	if err != nil {
 		h.handleError(w, http.StatusInternalServerError, err)
@@ -105,8 +103,7 @@ func (h *SecretHandler) GeneratePassword(w http.ResponseWriter, r *http.Request)
 //	@Failure		500				{object}	model.ErrorResponse
 //	@Router			/secret/api/create [post]
 func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// Authorization check
-	user, err := auth.ValidateToken(r)
+	user, err := auth.ValidateToken(r, h.commonConfig.JWTSecretKey)
 	if err != nil || user == nil {
 		h.handleError(w, http.StatusUnauthorized, err)
 		return
@@ -118,15 +115,13 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set user ID and check fields
 	secret.UserID = user.ID
 	if secret.Title == "" || secret.Password == "" {
 		h.handleError(w, http.StatusBadRequest, errors.New("title and password cannot be empty"))
 		return
 	}
 
-	// Encrypt password and create the secret
-	secret.Password, err = crypto.Encrypt(secret.Password, []byte(h.config.EncryptionKey))
+	secret.Password, err = crypto.Encrypt(secret.Password, []byte(h.commonConfig.SecretEncKey))
 	if err != nil {
 		h.handleError(w, http.StatusInternalServerError, err)
 		return
@@ -156,7 +151,7 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 //	@Router			/secret/api/list [get]
 func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
 	// Authorization check
-	user, err := auth.ValidateToken(r)
+	user, err := auth.ValidateToken(r, h.commonConfig.JWTSecretKey)
 	if err != nil || user == nil {
 		h.handleError(w, http.StatusUnauthorized, err)
 		return
@@ -176,7 +171,7 @@ func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		decryptedPassword, err := crypto.Decrypt(secrets[i].Password, []byte(h.config.EncryptionKey))
+		decryptedPassword, err := crypto.Decrypt(secrets[i].Password, []byte(h.commonConfig.SecretEncKey))
 		if err != nil {
 			h.handleError(w, http.StatusInternalServerError, err)
 			return
@@ -205,7 +200,7 @@ func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
 //	@Router			/secret/api/secretdetail [post]
 func (h *SecretHandler) SecretDetail(w http.ResponseWriter, r *http.Request) {
 	// Authorization check
-	user, err := auth.ValidateToken(r)
+	user, err := auth.ValidateToken(r, h.commonConfig.JWTSecretKey)
 	if err != nil || user == nil {
 		h.handleError(w, http.StatusUnauthorized, err)
 		return

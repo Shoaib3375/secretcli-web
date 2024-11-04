@@ -1,5 +1,3 @@
-// health.go
-
 package health
 
 import (

@@ -2,8 +2,8 @@ package auth
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/go-redis/redis/v8"
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
@@ -13,16 +13,16 @@ import (
 )
 
 type AuthHandler struct {
-	usecase     model.AuthUsecase
-	renderer    *tmplrndr.Renderer
-	redisClient *redis.Client
+	usecase      model.AuthUsecase
+	renderer     *tmplrndr.Renderer
+	redisClient  *redis.Client
+	commonConfig *common.CommonConfig
 }
 
-func NewAuthHandler(usecase model.AuthUsecase, renderer *tmplrndr.Renderer, redisClient *redis.Client) *AuthHandler {
-	return &AuthHandler{usecase: usecase, renderer: renderer, redisClient: redisClient}
+func NewAuthHandler(usecase model.AuthUsecase, renderer *tmplrndr.Renderer, redisClient *redis.Client, commonConfig *common.CommonConfig) *AuthHandler {
+	return &AuthHandler{usecase: usecase, renderer: renderer, redisClient: redisClient, commonConfig: commonConfig}
 }
 
-// RegisterUserForm renders the registration form
 func (h *AuthHandler) LoginUserForm(w http.ResponseWriter, r *http.Request) {
 	if h.renderer == nil {
 		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
@@ -31,7 +31,6 @@ func (h *AuthHandler) LoginUserForm(w http.ResponseWriter, r *http.Request) {
 	h.renderer.Render(w, "auth.login.form", nil)
 }
 
-// RegisterUserForm renders the registration form
 func (h *AuthHandler) RegisterUserForm(w http.ResponseWriter, r *http.Request) {
 	if h.renderer == nil {
 		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
@@ -100,20 +99,28 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.usecase.Login(r.Context(), loginRequest.Email, loginRequest.Password)
+	jwtExpiryDuration, err := auth.GetJWTExpiryTime(h.commonConfig.JWTExpiry)
+	if err != nil {
+		fmt.Println("Error calculating JWT expiry time:", err)
+		return
+	}
+
+	user, err := h.usecase.Login(r.Context(), loginRequest.Email, loginRequest.Password, jwtExpiryDuration)
 	if err != nil {
 		h.handleError(w, http.StatusUnauthorized, err)
 		return
 	}
 
-	// Generate a JWT token for the user
-	token, err := auth.GenerateToken(user)
+	token, err := auth.GenerateToken(user, h.commonConfig.JWTSecretKey)
 	if err != nil {
 		h.handleError(w, http.StatusInternalServerError, err)
 		return
 	}
-	h.redisClient.Set(r.Context(), token, user.Email, 1*time.Minute)
 
+	err = h.redisClient.Set(r.Context(), token, user.Email, jwtExpiryDuration).Err()
+	if err != nil {
+		h.handleError(w, http.StatusInternalServerError, err)
+	}
 	common.RespondWithSuccess(w, http.StatusOK, "Login successful", map[string]interface{}{
 		"token":  token,
 		"expiry": user.Expiry,
