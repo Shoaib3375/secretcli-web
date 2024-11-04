@@ -8,17 +8,15 @@ import (
 	"github.com/mahinops/secretcli-web/internal/app/auth"
 	"github.com/mahinops/secretcli-web/internal/app/secret"
 	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
-	"github.com/mahinops/secretcli-web/internal/utils/common"
-	"gorm.io/gorm"
 )
 
-func RegisterWebRoutes(router *chi.Mux, db *gorm.DB, commonConfig *common.CommonConfig, renderer *tmplrndr.Renderer) {
+func RegisterWebRoutes(router *chi.Mux, renderer *tmplrndr.Renderer) {
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		renderer.Render(w, "index", nil) // Use the renderer instance
 	})
 
-	auth.RegisterWebRoutes(router, db, renderer)
-	secret.RegisterWebRoutes(router, db, commonConfig, renderer)
+	auth.RegisterWebRoutes(router, renderer)
+	secret.RegisterWebRoutes(router, renderer)
 }
 
 func (a *App) StartWebServer(port string) {

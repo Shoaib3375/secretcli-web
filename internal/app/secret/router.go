@@ -13,7 +13,7 @@ import (
 func RegisterAPIRoutes(router chi.Router, db *gorm.DB, commonConfig *common.CommonConfig) {
 	secretRepo := NewSqlSecretRepository(db)
 	secretService := NewSecretService(secretRepo)
-	secretHandler := NewSecretHandler(secretService, commonConfig, nil)
+	secretHandler := NewSecretHandler(secretService, commonConfig)
 
 	rateLimiter := middleware.NewRateLimiter(1 * time.Second)
 
@@ -26,13 +26,11 @@ func RegisterAPIRoutes(router chi.Router, db *gorm.DB, commonConfig *common.Comm
 	})
 }
 
-func RegisterWebRoutes(router chi.Router, db *gorm.DB, commonConfig *common.CommonConfig, renderer *tmplrndr.Renderer) {
-	secretRepo := NewSqlSecretRepository(db)
-	secretService := NewSecretService(secretRepo)
-	secretHandler := NewSecretHandler(secretService, commonConfig, renderer)
+func RegisterWebRoutes(router chi.Router, renderer *tmplrndr.Renderer) {
+	secretWebHandler := NewSecretWebHandler(renderer)
 
 	router.Route("/secret/web", func(r chi.Router) {
-		r.Get("/list", secretHandler.SecretListTemplate)
-		r.Get("/create", secretHandler.SecretCreateForm)
+		r.Get("/list", secretWebHandler.SecretListTemplate)
+		r.Get("/create", secretWebHandler.SecretCreateForm)
 	})
 }

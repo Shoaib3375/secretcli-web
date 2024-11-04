@@ -15,9 +15,9 @@ func RegisterAPIRoutes(router chi.Router, db *gorm.DB, redisClient *redis.Client
 	// Initialize repository, service, and handler for auth
 	authRepo := NewSqlAuthRepository(db)
 	authService := NewAuthService(authRepo)
-	authHandler := NewAuthHandler(authService, nil, redisClient, commonConfig)
+	authHandler := NewAuthHandler(authService, redisClient, commonConfig)
 
-	rateLimiter := middleware.NewRateLimiter(5 * time.Second)
+	rateLimiter := middleware.NewRateLimiter(1 * time.Second)
 
 	router.Route("/auth/api", func(r chi.Router) {
 		r.Use(rateLimiter.LimitMiddleware)
@@ -26,13 +26,11 @@ func RegisterAPIRoutes(router chi.Router, db *gorm.DB, redisClient *redis.Client
 	})
 }
 
-func RegisterWebRoutes(router chi.Router, db *gorm.DB, renderer *tmplrndr.Renderer) {
-	authRepo := NewSqlAuthRepository(db)
-	authService := NewAuthService(authRepo)
-	authHandler := NewAuthHandler(authService, renderer, nil, nil)
+func RegisterWebRoutes(router chi.Router, renderer *tmplrndr.Renderer) {
+	authWebHandler := NewAuthWebHandler(renderer)
 
 	router.Route("/auth/web", func(r chi.Router) {
-		r.Get("/register", authHandler.RegisterUserForm)
-		r.Get("/login", authHandler.LoginUserForm)
+		r.Get("/register", authWebHandler.RegisterUserForm)
+		r.Get("/login", authWebHandler.LoginUserForm)
 	})
 }

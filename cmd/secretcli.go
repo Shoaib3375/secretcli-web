@@ -47,7 +47,7 @@ func NewApp(configFile, mode string) (*App, error) {
 	} else if mode == "web" {
 		renderer := tmplrndr.NewRenderer("templates/**/*.tmpl")
 		router.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-		RegisterWebRoutes(router, db, commonCfg, renderer)
+		RegisterWebRoutes(router, renderer)
 	}
 	return &App{Router: router, db: db, commonConfig: commonCfg}, nil
 }

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/auth"
 	"github.com/mahinops/secretcli-web/internal/utils/common"
 	"github.com/mahinops/secretcli-web/internal/utils/crypto"
@@ -17,28 +16,11 @@ import (
 type SecretHandler struct {
 	service      *SecretService
 	commonConfig *common.CommonConfig
-	renderer     *tmplrndr.Renderer
 }
 
 // NewSecretHandler creates a new instance of SecretHandler// NewSecretHandler creates a new instance of SecretHandler
-func NewSecretHandler(service *SecretService, commonConfig *common.CommonConfig, renderer *tmplrndr.Renderer) *SecretHandler {
-	return &SecretHandler{service: service, commonConfig: commonConfig, renderer: renderer} // Update this line
-}
-
-func (h *SecretHandler) SecretCreateForm(w http.ResponseWriter, r *http.Request) {
-	if h.renderer == nil {
-		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
-		return
-	}
-	h.renderer.Render(w, "secrets.create.form", nil)
-}
-
-func (h *SecretHandler) SecretListTemplate(w http.ResponseWriter, r *http.Request) {
-	if h.renderer == nil {
-		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
-		return
-	}
-	h.renderer.Render(w, "secrets.table", nil)
+func NewSecretHandler(service *SecretService, commonConfig *common.CommonConfig) *SecretHandler {
+	return &SecretHandler{service: service, commonConfig: commonConfig} // Update this line
 }
 
 func (h *SecretHandler) handleError(w http.ResponseWriter, code int, err error) {

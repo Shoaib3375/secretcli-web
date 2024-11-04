@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/go-redis/redis/v8"
-	tmplrndr "github.com/mahinops/secretcli-web/internal/tmpl-rndr"
 	"github.com/mahinops/secretcli-web/internal/utils/auth"
 	"github.com/mahinops/secretcli-web/internal/utils/common"
 	"github.com/mahinops/secretcli-web/model"
@@ -14,30 +13,14 @@ import (
 
 type AuthHandler struct {
 	usecase      model.AuthUsecase
-	renderer     *tmplrndr.Renderer
 	redisClient  *redis.Client
 	commonConfig *common.CommonConfig
 }
 
-func NewAuthHandler(usecase model.AuthUsecase, renderer *tmplrndr.Renderer, redisClient *redis.Client, commonConfig *common.CommonConfig) *AuthHandler {
-	return &AuthHandler{usecase: usecase, renderer: renderer, redisClient: redisClient, commonConfig: commonConfig}
+func NewAuthHandler(usecase model.AuthUsecase, redisClient *redis.Client, commonConfig *common.CommonConfig) *AuthHandler {
+	return &AuthHandler{usecase: usecase, redisClient: redisClient, commonConfig: commonConfig}
 }
 
-func (h *AuthHandler) LoginUserForm(w http.ResponseWriter, r *http.Request) {
-	if h.renderer == nil {
-		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
-		return
-	}
-	h.renderer.Render(w, "auth.login.form", nil)
-}
-
-func (h *AuthHandler) RegisterUserForm(w http.ResponseWriter, r *http.Request) {
-	if h.renderer == nil {
-		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
-		return
-	}
-	h.renderer.Render(w, "auth.registration.form", nil)
-}
 func (h *AuthHandler) handleError(w http.ResponseWriter, code int, err error) {
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(model.ErrorResponse{
