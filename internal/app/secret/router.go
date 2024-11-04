@@ -15,7 +15,7 @@ func RegisterAPIRoutes(router chi.Router, db *gorm.DB, commonConfig *common.Comm
 	secretService := NewSecretService(secretRepo)
 	secretHandler := NewSecretHandler(secretService, commonConfig, nil)
 
-	rateLimiter := middleware.NewRateLimiter(5 * time.Second)
+	rateLimiter := middleware.NewRateLimiter(1 * time.Second)
 
 	router.Route("/secret/api", func(r chi.Router) {
 		r.Use(rateLimiter.LimitMiddleware)

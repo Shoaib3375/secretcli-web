@@ -23,8 +23,8 @@ async function submitLogin(event) {
       const jsonResponse = JSON.parse(responseBodyText);
 
       // Save the token and expiry in localStorage
-      localStorage.setItem('token', jsonResponse.token);
-      localStorage.setItem('expiry', jsonResponse.expiry);
+      localStorage.setItem('token', jsonResponse.data.token);
+      localStorage.setItem('expiry', jsonResponse.data.expiry);
 
       // Redirect to success page or show success message
       window.location.href = '/'; // Change to your desired success page

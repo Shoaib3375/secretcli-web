@@ -17,14 +17,14 @@ async function fetchSecrets() {
       throw new Error('Failed to fetch secrets');
     }
 
-    const secrets = await response.json(); // Parse the response JSON
+    const result = await response.json(); // Parse the response JSON
+    const secrets = result.data.secrets; // Access the secrets array
     populateSecretsTable(secrets); // Populate the table with fetched secrets
   } catch (error) {
     console.error('Error fetching secrets:', error);
     alert('Error fetching secrets: ' + error.message);
   }
 }
-
 // Function to populate the secrets table with data
 function populateSecretsTable(secrets) {
   const tableBody = document.querySelector('tbody'); // Get the table body element
