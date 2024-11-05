@@ -1,8 +1,27 @@
+// Function to toggle password visibility
+function togglePasswordVisibility() {
+  const passwordField = document.getElementById('password');
+  const eyeIcon = document.getElementById('eye-icon');
+  if (passwordField.type === "password") {
+    passwordField.type = "text";
+    eyeIcon.textContent = '🙈'; // Hide icon
+  } else {
+    passwordField.type = "password";
+    eyeIcon.textContent = '👁️'; // Show icon
+  }
+}
+
+// Function to handle login form submission
 async function submitLogin(event) {
   event.preventDefault(); // Prevent the default form submission
 
+  // Clear previous error message
+  const errorMessageElement = document.getElementById('error-message');
+  errorMessageElement.style.display = 'none';  // Hide error message initially
+  errorMessageElement.textContent = '';
+
   // Get the form data
-  const formData = new FormData(event.target);
+  const formData = new FormData(document.getElementById('login-form'));
   const data = Object.fromEntries(formData);
 
   try {
@@ -15,37 +34,26 @@ async function submitLogin(event) {
       body: JSON.stringify(data),
     });
 
-    // Store the response body as text
-    const responseBodyText = await response.text();
-
+    // Check if response is ok
     if (response.ok) {
-      // Parse the JSON response
-      const jsonResponse = JSON.parse(responseBodyText);
+      // Parse JSON and save the token
+      const jsonResponse = await response.json();
 
-      // Save the token and expiry in localStorage
+      // Store the token and expiry in localStorage
       localStorage.setItem('token', jsonResponse.data.token);
       localStorage.setItem('expiry', jsonResponse.data.expiry);
 
-      // Redirect to success page or show success message
-      window.location.href = '/'; // Change to your desired success page
+      // Redirect to the home page or desired page
+      window.location.href = '/'; // Adjust as needed
     } else {
-      // Attempt to parse the error response
-      let errorData;
-      try {
-        errorData = JSON.parse(responseBodyText); // Try to parse it as JSON
-      } catch (jsonError) {
-        errorData = { message: responseBodyText }; // Use the plain text response as the error message
-      }
-
-      // Display the error message in a popup alert
-      alert(`Error: ${errorData.message || 'Login failed'}`);
-      console.error('Server response:', errorData.message);
+      // If response is not ok, parse error message and display it
+      const errorData = await response.json();
+      errorMessageElement.textContent = errorData.message || 'Login failed';
+      errorMessageElement.style.display = 'block'; // Show error message
     }
   } catch (error) {
     console.error('Error:', error);
-    alert(`Error: ${error.message}`);
+    errorMessageElement.textContent = `Error: ${error.message}`;
+    errorMessageElement.style.display = 'block'; // Show error message
   }
 }
-
-// Attach the submitLogin function to the form submit event
-document.getElementById('login-form').addEventListener('submit', submitLogin);

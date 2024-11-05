@@ -1,0 +1,44 @@
+{{define "auth.register.form"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="/static/css/register.css">
+    <script src="/static/js/register.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Create Your Account</h2>
+        
+        <form id="register-form" onsubmit="return submitRegister(event);">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            
+            <label for="password">Password</label>
+            <div class="input-container">
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <button type="button" class="toggle-visibility" onclick="togglePasswordVisibility('password')">
+                    <span id="eye-icon-password">👁️</span>
+                </button>
+            </div>
+
+            <!-- Error message display -->
+            <div id="error-message" class="error-message"></div>
+            
+            <button type="submit" class="register-button">Register</button>
+            
+            <small class="tooltip">Ensure your password is strong and unique.</small>
+        </form>
+
+        <div class="login-link">
+            <p>Already registered? <a href="/auth/web/login">Login here</a></p>
+        </div>
+    </div>
+</body>
+</html>
+{{end}}

@@ -2,32 +2,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - SecretCLI</title>
-  <script src="/static/js/login.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+    <script src="/static/js/login.js" defer></script>
 </head>
 <body>
-  {{template "homenav"}}
-  <h1>Login</h1>
-  
-  <form id="login-form" method="POST">
-    <div>
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required>
+    <div class="container">
+        <h2>Login to Your Account</h2>
+        
+        <form id="login-form" onsubmit="return submitLogin(event);">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            
+            <label for="password">Password</label>
+            <div class="input-container">
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <button type="button" class="toggle-visibility" onclick="togglePasswordVisibility()">
+                    <span id="eye-icon">👁️</span>
+                </button>
+            </div>
+            <!-- Error message container -->
+            <div id="error-message" class="error-message"></div>
+            
+            <button type="submit" class="login-button">Login</button>
+            
+            <small class="tooltip">Ensure your password is strong and unique.</small>
+        </form>
+        <div class="register-link">
+          <p>No Account? <a href="/auth/web/register">Register Here</a></p>
+        </div>
     </div>
-    
-    <div>
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
-    </div>
-
-    <div>
-      <input type="submit" value="Login">
-    </div>
-  </form>
-
-  <p>Don't have an account? <a href="/auth/web/register">Register here</a>.</p>
 </body>
 </html>
 {{end}}

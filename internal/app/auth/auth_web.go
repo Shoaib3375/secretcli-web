@@ -27,5 +27,5 @@ func (web *AuthWebHandler) RegisterUserForm(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Renderer is not initialized", http.StatusInternalServerError)
 		return
 	}
-	web.renderer.Render(w, "auth.registration.form", nil)
+	web.renderer.Render(w, "auth.register.form", nil)
 }
