@@ -188,6 +188,9 @@ spec:
       tolerations:
       - key: CriticalAddonsOnly
         operator: Exists
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
       topologySpreadConstraints:
       - labelSelector:
           matchLabels:
@@ -381,3 +384,6 @@ spec:
       tolerations:
       - key: CriticalAddonsOnly
         operator: Exists
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
