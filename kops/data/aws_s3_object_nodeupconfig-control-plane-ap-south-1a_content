@@ -1,5 +1,6 @@
 APIServerConfig:
-  API: {}
+  API:
+    publicName: api.kops-k8s.prodcrashed.live
   ClusterDNSDomain: cluster.local
   KubeAPIServer:
     allowPrivileged: true
@@ -243,6 +244,7 @@ ControlPlaneConfig:
     leaderElection:
       leaderElect: true
     logLevel: 2
+DNSZone: Z0993076W80J6GS37CVQ
 EtcdClusterNames:
 - main
 - events
@@ -315,4 +317,4 @@ staticManifests:
 - key: kube-apiserver-healthcheck
   path: manifests/static/kube-apiserver-healthcheck.yaml
 usesLegacyGossip: false
-usesNoneDNS: true
+usesNoneDNS: false

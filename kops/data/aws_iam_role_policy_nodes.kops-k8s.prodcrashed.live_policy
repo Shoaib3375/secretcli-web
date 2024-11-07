@@ -2,6 +2,18 @@
   "Statement": [
     {
       "Action": [
+        "s3:GetBucketLocation",
+        "s3:GetEncryptionConfiguration",
+        "s3:ListBucket",
+        "s3:ListBucketVersions"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::kops-s3-bucket-1"
+      ]
+    },
+    {
+      "Action": [
         "autoscaling:DescribeAutoScalingInstances",
         "ec2:DescribeInstanceTypes",
         "ec2:DescribeInstances",

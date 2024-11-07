@@ -2,6 +2,7 @@ apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
   creationTimestamp: "2024-11-07T12:11:09Z"
+  generation: 1
   name: kops-k8s.prodcrashed.live
 spec:
   api:
@@ -31,6 +32,7 @@ spec:
     runc:
       version: 1.1.12
     version: 1.6.31
+  dnsZone: Z0993076W80J6GS37CVQ
   etcdClusters:
   - backups:
       backupStore: s3://kops-s3-bucket-1/kops-k8s.prodcrashed.live/backups/etcd/main
@@ -56,6 +58,8 @@ spec:
     memoryRequest: 100Mi
     name: events
     version: 3.5.13
+  externalDns:
+    provider: dns-controller
   iam:
     allowContainerRegistry: true
     legacy: false
@@ -192,6 +196,7 @@ spec:
     registerSchedulable: true
     shutdownGracePeriod: 30s
     shutdownGracePeriodCriticalPods: 10s
+  masterPublicName: api.kops-k8s.prodcrashed.live
   networkCIDR: 172.20.0.0/16
   networking:
     cilium:
@@ -256,4 +261,4 @@ spec:
     zone: ap-south-1a
   topology:
     dns:
-      type: None
+      type: Public

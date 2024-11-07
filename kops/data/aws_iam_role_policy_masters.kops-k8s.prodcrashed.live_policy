@@ -53,6 +53,36 @@
       ]
     },
     {
+      "Action": [
+        "route53:ChangeResourceRecordSets",
+        "route53:GetHostedZone",
+        "route53:ListResourceRecordSets"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:route53:::hostedzone/Z0993076W80J6GS37CVQ"
+      ]
+    },
+    {
+      "Action": [
+        "route53:GetChange"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:route53:::change/*"
+      ]
+    },
+    {
+      "Action": [
+        "route53:ListHostedZones",
+        "route53:ListTagsForResource"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ]
+    },
+    {
       "Action": "ec2:CreateTags",
       "Condition": {
         "StringEquals": {

@@ -153,7 +153,7 @@ resource "aws_autoscaling_group" "control-plane-ap-south-1a-masters-kops-k8s-pro
     propagate_at_launch = true
     value               = "owned"
   }
-  target_group_arns   = [aws_lb_target_group.kops-controller-kops-k8s--j959e1.id, aws_lb_target_group.tcp-kops-k8s-prodcrashed--i61hbp.id]
+  target_group_arns   = [aws_lb_target_group.tcp-kops-k8s-prodcrashed--i61hbp.id]
   vpc_zone_identifier = [aws_subnet.ap-south-1a-kops-k8s-prodcrashed-live.id]
 }
 
@@ -544,7 +544,7 @@ resource "aws_launch_template" "nodes-ap-south-1a-kops-k8s-prodcrashed-live" {
 }
 
 resource "aws_lb" "api-kops-k8s-prodcrashed-live" {
-  enable_cross_zone_load_balancing = true
+  enable_cross_zone_load_balancing = false
   internal                         = false
   load_balancer_type               = "network"
   name                             = "api-kops-k8s-prodcrashed--fsrnsu"
@@ -559,16 +559,6 @@ resource "aws_lb" "api-kops-k8s-prodcrashed-live" {
   }
 }
 
-resource "aws_lb_listener" "api-kops-k8s-prodcrashed-live-3988" {
-  default_action {
-    target_group_arn = aws_lb_target_group.kops-controller-kops-k8s--j959e1.id
-    type             = "forward"
-  }
-  load_balancer_arn = aws_lb.api-kops-k8s-prodcrashed-live.id
-  port              = 3988
-  protocol          = "TCP"
-}
-
 resource "aws_lb_listener" "api-kops-k8s-prodcrashed-live-443" {
   default_action {
     target_group_arn = aws_lb_target_group.tcp-kops-k8s-prodcrashed--i61hbp.id
@@ -577,26 +567,6 @@ resource "aws_lb_listener" "api-kops-k8s-prodcrashed-live-443" {
   load_balancer_arn = aws_lb.api-kops-k8s-prodcrashed-live.id
   port              = 443
   protocol          = "TCP"
-}
-
-resource "aws_lb_target_group" "kops-controller-kops-k8s--j959e1" {
-  connection_termination = "true"
-  deregistration_delay   = "30"
-  health_check {
-    healthy_threshold   = 2
-    interval            = 10
-    protocol            = "TCP"
-    unhealthy_threshold = 2
-  }
-  name     = "kops-controller-kops-k8s--j959e1"
-  port     = 3988
-  protocol = "TCP"
-  tags = {
-    "KubernetesCluster"                               = "kops-k8s.prodcrashed.live"
-    "Name"                                            = "kops-controller-kops-k8s--j959e1"
-    "kubernetes.io/cluster/kops-k8s.prodcrashed.live" = "owned"
-  }
-  vpc_id = aws_vpc.kops-k8s-prodcrashed-live.id
 }
 
 resource "aws_lb_target_group" "tcp-kops-k8s-prodcrashed--i61hbp" {
@@ -629,6 +599,28 @@ resource "aws_route" "route-__--0" {
   destination_ipv6_cidr_block = "::/0"
   gateway_id                  = aws_internet_gateway.kops-k8s-prodcrashed-live.id
   route_table_id              = aws_route_table.kops-k8s-prodcrashed-live.id
+}
+
+resource "aws_route53_record" "api-kops-k8s-prodcrashed-live" {
+  alias {
+    evaluate_target_health = false
+    name                   = aws_lb.api-kops-k8s-prodcrashed-live.dns_name
+    zone_id                = aws_lb.api-kops-k8s-prodcrashed-live.zone_id
+  }
+  name    = "api.kops-k8s.prodcrashed.live"
+  type    = "A"
+  zone_id = "/hostedzone/Z0993076W80J6GS37CVQ"
+}
+
+resource "aws_route53_record" "api-kops-k8s-prodcrashed-live-AAAA" {
+  alias {
+    evaluate_target_health = false
+    name                   = aws_lb.api-kops-k8s-prodcrashed-live.dns_name
+    zone_id                = aws_lb.api-kops-k8s-prodcrashed-live.zone_id
+  }
+  name    = "api.kops-k8s.prodcrashed.live"
+  type    = "AAAA"
+  zone_id = "/hostedzone/Z0993076W80J6GS37CVQ"
 }
 
 resource "aws_route_table" "kops-k8s-prodcrashed-live" {
@@ -705,6 +697,15 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-coredns-addons-k8s-io
   bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-coredns.addons.k8s.io-k8s-1.12_content")
   key                    = "kops-k8s.prodcrashed.live/addons/coredns.addons.k8s.io/k8s-1.12.yaml"
+  provider               = aws.files
+  server_side_encryption = "AES256"
+}
+
+resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-dns-controller-addons-k8s-io-k8s-1-12" {
+  acl                    = "bucket-owner-full-control"
+  bucket                 = "kops-s3-bucket-1"
+  content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-dns-controller.addons.k8s.io-k8s-1.12_content")
+  key                    = "kops-k8s.prodcrashed.live/addons/dns-controller.addons.k8s.io/k8s-1.12.yaml"
   provider               = aws.files
   server_side_encryption = "AES256"
 }
@@ -1073,24 +1074,6 @@ resource "aws_security_group_rule" "icmpv6-pmtu-api-elb-__--0" {
   security_group_id = aws_security_group.api-elb-kops-k8s-prodcrashed-live.id
   to_port           = -1
   type              = "ingress"
-}
-
-resource "aws_security_group_rule" "kops-controller-elb-to-cp" {
-  from_port                = 3988
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.masters-kops-k8s-prodcrashed-live.id
-  source_security_group_id = aws_security_group.api-elb-kops-k8s-prodcrashed-live.id
-  to_port                  = 3988
-  type                     = "ingress"
-}
-
-resource "aws_security_group_rule" "node-to-elb" {
-  from_port                = 0
-  protocol                 = "-1"
-  security_group_id        = aws_security_group.api-elb-kops-k8s-prodcrashed-live.id
-  source_security_group_id = aws_security_group.nodes-kops-k8s-prodcrashed-live.id
-  to_port                  = 0
-  type                     = "ingress"
 }
 
 resource "aws_sqs_queue" "kops-k8s-prodcrashed-live-nth" {
