@@ -130,7 +130,7 @@ ClusterName: kops-k8s.prodcrashed.live
 ConfigBase: s3://kops-s3-bucket-1/kops-k8s.prodcrashed.live
 InstanceGroupName: control-plane-ap-south-1a
 InstanceGroupRole: ControlPlane
-NodeupConfigHash: 3dik1iwPIt3RDlJriHLfboPbYfhuKJXzWZtsAkazspw=
+NodeupConfigHash: IDuBqFkWae6OMNX6FqLzovykqkz4Kb3etdID299/vbM=
 
 __EOF_KUBE_ENV
 

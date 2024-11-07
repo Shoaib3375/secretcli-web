@@ -87,6 +87,11 @@ output "vpc_ipv6_cidr_length" {
 }
 
 provider "aws" {
+  region  = "ap-south-1"
+  profile = "new"
+}
+
+provider "aws" {
   alias  = "files"
   region = "ap-south-1"
 }
@@ -164,9 +169,9 @@ resource "aws_autoscaling_group" "nodes-ap-south-1a-kops-k8s-prodcrashed-live" {
     version = aws_launch_template.nodes-ap-south-1a-kops-k8s-prodcrashed-live.latest_version
   }
   max_instance_lifetime = 0
-  max_size              = 2
+  max_size              = 1
   metrics_granularity   = "1Minute"
-  min_size              = 2
+  min_size              = 1
   name                  = "nodes-ap-south-1a.kops-k8s.prodcrashed.live"
   protect_from_scale_in = false
   tag {

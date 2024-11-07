@@ -1,7 +1,7 @@
 apiVersion: kops.k8s.io/v1alpha2
 kind: Cluster
 metadata:
-  creationTimestamp: "2024-11-07T12:11:09Z"
+  creationTimestamp: "2024-11-07T14:25:41Z"
   generation: 1
   name: kops-k8s.prodcrashed.live
 spec:
