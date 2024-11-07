@@ -164,9 +164,9 @@ resource "aws_autoscaling_group" "nodes-ap-south-1a-kops-k8s-prodcrashed-live" {
     version = aws_launch_template.nodes-ap-south-1a-kops-k8s-prodcrashed-live.latest_version
   }
   max_instance_lifetime = 0
-  max_size              = 1
+  max_size              = 2
   metrics_granularity   = "1Minute"
-  min_size              = 1
+  min_size              = 2
   name                  = "nodes-ap-south-1a.kops-k8s.prodcrashed.live"
   protect_from_scale_in = false
   tag {

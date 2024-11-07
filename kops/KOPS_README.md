@@ -26,11 +26,51 @@ kops create cluster \
 kops get clusters
 ```
 
+Edit instancegroup
+```
+kops edit instancegroup nodes-ap-south-1a
+```
+
+To edis the cluster
+```
+kops edit cluster \
+  --name=kops-k8s.prodcrashed.live \
+  --state=s3://kops-s3-bucket-1
+```
+
+
+To update the cluster
 
 ```
-kops update cluster
+kops update cluster \
+  --name=kops-k8s.prodcrashed.live \
+  --state=s3://kops-s3-bucket-1 \
+  --out=./ \
+  --target=terraform
 ```
+
+---
+
+Toleration Issue
+
+coredns-autoscaler and coredns pending issue
+```
+kubectl edit deployment -n kube-system coredns
+
+# Add the following tolerations under spec.template.spec:
+tolerations:
+- key: "node-role.kubernetes.io/control-plane"
+  operator: "Exists"
+  effect: "NoSchedule"
+```
+---
 
 ```
 kops delete cluster kops-k8s.prodcrashed.live --yes
 ```
+
+Time
+
+**terraform init** - 1:30 mins
+**terraform plan** - 10 secs
+**terraform apply** - 6:20 mins

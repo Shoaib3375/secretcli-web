@@ -56,6 +56,8 @@ APIServerConfig:
     Cj3SuFj1P3BhVYH1zgQvg4GwCkFjnZY+pZWnkND5y8Dq0UmXbGUNrrFNzNIueE/0
     WQIDAQAB
     -----END RSA PUBLIC KEY-----
+ApiserverAdditionalIPs:
+- api-kops-k8s-prodcrashed--fsrnsu-94a499229e2f3b54.elb.ap-south-1.amazonaws.com
 Assets:
   amd64:
   - 1136c5717df316c6d4efd96a676574825f771666b7a9148338f0079bb9412720@https://dl.k8s.io/release/v1.25.15/bin/linux/amd64/kubelet,https://cdn.dl.k8s.io/release/v1.25.15/bin/linux/amd64/kubelet
