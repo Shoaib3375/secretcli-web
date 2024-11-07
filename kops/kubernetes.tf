@@ -164,9 +164,9 @@ resource "aws_autoscaling_group" "nodes-ap-south-1a-kops-k8s-prodcrashed-live" {
     version = aws_launch_template.nodes-ap-south-1a-kops-k8s-prodcrashed-live.latest_version
   }
   max_instance_lifetime = 0
-  max_size              = 3
+  max_size              = 1
   metrics_granularity   = "1Minute"
-  min_size              = 3
+  min_size              = 1
   name                  = "nodes-ap-south-1a.kops-k8s.prodcrashed.live"
   protect_from_scale_in = false
   tag {
@@ -404,7 +404,7 @@ resource "aws_launch_template" "control-plane-ap-south-1a-masters-kops-k8s-prodc
     name = aws_iam_instance_profile.masters-kops-k8s-prodcrashed-live.id
   }
   image_id      = "ami-0554f7fb41d511dd0"
-  instance_type = "t3.micro"
+  instance_type = "t3.medium"
   key_name      = aws_key_pair.kubernetes-kops-k8s-prodcrashed-live-006765ba239e1535853258a6d4c7229f.id
   lifecycle {
     create_before_destroy = true
@@ -486,7 +486,7 @@ resource "aws_launch_template" "nodes-ap-south-1a-kops-k8s-prodcrashed-live" {
     name = aws_iam_instance_profile.nodes-kops-k8s-prodcrashed-live.id
   }
   image_id      = "ami-0554f7fb41d511dd0"
-  instance_type = "t3.micro"
+  instance_type = "t3.medium"
   key_name      = aws_key_pair.kubernetes-kops-k8s-prodcrashed-live-006765ba239e1535853258a6d4c7229f.id
   lifecycle {
     create_before_destroy = true
@@ -648,7 +648,7 @@ resource "aws_route_table_association" "ap-south-1a-kops-k8s-prodcrashed-live" {
 
 resource "aws_s3_object" "cluster-completed-spec" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_cluster-completed.spec_content")
   key                    = "kops-k8s.prodcrashed.live/cluster-completed.spec"
   provider               = aws.files
@@ -657,7 +657,7 @@ resource "aws_s3_object" "cluster-completed-spec" {
 
 resource "aws_s3_object" "etcd-cluster-spec-events" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_etcd-cluster-spec-events_content")
   key                    = "kops-k8s.prodcrashed.live/backups/etcd/events/control/etcd-cluster-spec"
   provider               = aws.files
@@ -666,7 +666,7 @@ resource "aws_s3_object" "etcd-cluster-spec-events" {
 
 resource "aws_s3_object" "etcd-cluster-spec-main" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_etcd-cluster-spec-main_content")
   key                    = "kops-k8s.prodcrashed.live/backups/etcd/main/control/etcd-cluster-spec"
   provider               = aws.files
@@ -675,7 +675,7 @@ resource "aws_s3_object" "etcd-cluster-spec-main" {
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-aws-cloud-controller-addons-k8s-io-k8s-1-18" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-aws-cloud-controller.addons.k8s.io-k8s-1.18_content")
   key                    = "kops-k8s.prodcrashed.live/addons/aws-cloud-controller.addons.k8s.io/k8s-1.18.yaml"
   provider               = aws.files
@@ -684,7 +684,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-aws-cloud-controller-
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-aws-ebs-csi-driver-addons-k8s-io-k8s-1-17" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-aws-ebs-csi-driver.addons.k8s.io-k8s-1.17_content")
   key                    = "kops-k8s.prodcrashed.live/addons/aws-ebs-csi-driver.addons.k8s.io/k8s-1.17.yaml"
   provider               = aws.files
@@ -693,7 +693,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-aws-ebs-csi-driver-ad
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-bootstrap" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-bootstrap_content")
   key                    = "kops-k8s.prodcrashed.live/addons/bootstrap-channel.yaml"
   provider               = aws.files
@@ -702,7 +702,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-bootstrap" {
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-coredns-addons-k8s-io-k8s-1-12" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-coredns.addons.k8s.io-k8s-1.12_content")
   key                    = "kops-k8s.prodcrashed.live/addons/coredns.addons.k8s.io/k8s-1.12.yaml"
   provider               = aws.files
@@ -711,7 +711,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-coredns-addons-k8s-io
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-kops-controller-addons-k8s-io-k8s-1-16" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-kops-controller.addons.k8s.io-k8s-1.16_content")
   key                    = "kops-k8s.prodcrashed.live/addons/kops-controller.addons.k8s.io/k8s-1.16.yaml"
   provider               = aws.files
@@ -720,7 +720,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-kops-controller-addon
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-kubelet-api-rbac-addons-k8s-io-k8s-1-9" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-kubelet-api.rbac.addons.k8s.io-k8s-1.9_content")
   key                    = "kops-k8s.prodcrashed.live/addons/kubelet-api.rbac.addons.k8s.io/k8s-1.9.yaml"
   provider               = aws.files
@@ -729,7 +729,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-kubelet-api-rbac-addo
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-leader-migration-rbac-addons-k8s-io-k8s-1-23" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-leader-migration.rbac.addons.k8s.io-k8s-1.23_content")
   key                    = "kops-k8s.prodcrashed.live/addons/leader-migration.rbac.addons.k8s.io/k8s-1.23.yaml"
   provider               = aws.files
@@ -738,7 +738,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-leader-migration-rbac
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-limit-range-addons-k8s-io" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-limit-range.addons.k8s.io_content")
   key                    = "kops-k8s.prodcrashed.live/addons/limit-range.addons.k8s.io/v1.5.0.yaml"
   provider               = aws.files
@@ -747,7 +747,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-limit-range-addons-k8
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-networking-cilium-io-k8s-1-16" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-networking.cilium.io-k8s-1.16_content")
   key                    = "kops-k8s.prodcrashed.live/addons/networking.cilium.io/k8s-1.16-v1.15.yaml"
   provider               = aws.files
@@ -756,7 +756,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-networking-cilium-io-
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-node-termination-handler-aws-k8s-1-11" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-node-termination-handler.aws-k8s-1.11_content")
   key                    = "kops-k8s.prodcrashed.live/addons/node-termination-handler.aws/k8s-1.11.yaml"
   provider               = aws.files
@@ -765,7 +765,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-node-termination-hand
 
 resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-storage-aws-addons-k8s-io-v1-15-0" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-k8s.prodcrashed.live-addons-storage-aws.addons.k8s.io-v1.15.0_content")
   key                    = "kops-k8s.prodcrashed.live/addons/storage-aws.addons.k8s.io/v1.15.0.yaml"
   provider               = aws.files
@@ -774,7 +774,7 @@ resource "aws_s3_object" "kops-k8s-prodcrashed-live-addons-storage-aws-addons-k8
 
 resource "aws_s3_object" "kops-version-txt" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_kops-version.txt_content")
   key                    = "kops-k8s.prodcrashed.live/kops-version.txt"
   provider               = aws.files
@@ -783,7 +783,7 @@ resource "aws_s3_object" "kops-version-txt" {
 
 resource "aws_s3_object" "manifests-etcdmanager-events-control-plane-ap-south-1a" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_manifests-etcdmanager-events-control-plane-ap-south-1a_content")
   key                    = "kops-k8s.prodcrashed.live/manifests/etcd/events-control-plane-ap-south-1a.yaml"
   provider               = aws.files
@@ -792,7 +792,7 @@ resource "aws_s3_object" "manifests-etcdmanager-events-control-plane-ap-south-1a
 
 resource "aws_s3_object" "manifests-etcdmanager-main-control-plane-ap-south-1a" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_manifests-etcdmanager-main-control-plane-ap-south-1a_content")
   key                    = "kops-k8s.prodcrashed.live/manifests/etcd/main-control-plane-ap-south-1a.yaml"
   provider               = aws.files
@@ -801,7 +801,7 @@ resource "aws_s3_object" "manifests-etcdmanager-main-control-plane-ap-south-1a" 
 
 resource "aws_s3_object" "manifests-static-kube-apiserver-healthcheck" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_manifests-static-kube-apiserver-healthcheck_content")
   key                    = "kops-k8s.prodcrashed.live/manifests/static/kube-apiserver-healthcheck.yaml"
   provider               = aws.files
@@ -810,7 +810,7 @@ resource "aws_s3_object" "manifests-static-kube-apiserver-healthcheck" {
 
 resource "aws_s3_object" "nodeupconfig-control-plane-ap-south-1a" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_nodeupconfig-control-plane-ap-south-1a_content")
   key                    = "kops-k8s.prodcrashed.live/igconfig/control-plane/control-plane-ap-south-1a/nodeupconfig.yaml"
   provider               = aws.files
@@ -819,7 +819,7 @@ resource "aws_s3_object" "nodeupconfig-control-plane-ap-south-1a" {
 
 resource "aws_s3_object" "nodeupconfig-nodes-ap-south-1a" {
   acl                    = "bucket-owner-full-control"
-  bucket                 = "test-kops-s3-bucket"
+  bucket                 = "kops-s3-bucket-1"
   content                = file("${path.module}/data/aws_s3_object_nodeupconfig-nodes-ap-south-1a_content")
   key                    = "kops-k8s.prodcrashed.live/igconfig/node/nodes-ap-south-1a/nodeupconfig.yaml"
   provider               = aws.files
