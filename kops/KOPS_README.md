@@ -1,16 +1,21 @@
+
+Set AWS Credentials at: `~/.aws/credentials`
 ```
-export KOPS_STATE_STORE=s3://test-kops-s3-bucket
+export AWS_PROFILE="cred-name"
+```
+
+```
+export KOPS_STATE_STORE=s3://kops-s3-bucket-1
 ```
 
 ```
 kops create cluster \
   --name=kops-k8s.prodcrashed.live \
   --cloud=aws \
-  --state=s3://test-kops-s3-bucket \
+  --state=s3://kops-s3-bucket-1 \
   --zones=ap-south-1a \
-  --node-count=2 \
-  --node-size=t3.micro \
-  --control-plane-size=t3.micro \
+  --node-size=t3.medium \
+  --control-plane-size=t3.medium \
   --kubernetes-version=1.25.15 \
   --ssh-public-key ~/.ssh/id_rsa.pub \
   --out=./ \
