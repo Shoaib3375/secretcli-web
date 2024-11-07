@@ -1,0 +1,16 @@
+{
+  "Statement": [
+    {
+      "Action": "sqs:SendMessage",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [
+          "events.amazonaws.com",
+          "sqs.amazonaws.com"
+        ]
+      },
+      "Resource": "arn:aws:sqs:ap-south-1:640168447823:kops-k8s-prodcrashed-live-nth"
+    }
+  ],
+  "Version": "2012-10-17"
+}
