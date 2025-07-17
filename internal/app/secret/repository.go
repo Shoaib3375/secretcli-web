@@ -2,7 +2,7 @@ package secret
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/mahinops/secretcli-web/internal/utils/crypto"
 	"github.com/mahinops/secretcli-web/model"
 	"gorm.io/gorm"
@@ -42,4 +42,19 @@ func (r *SqlSecretRepository) SecretDetail(ctx context.Context, userID uint, sec
 		return model.Secret{}, err
 	}
 	return secret, nil
+}
+
+func (r *SqlSecretRepository) DeleteSecretByID(ctx context.Context, userID uint, secretID int) error {
+	result := r.db.Where("user_id = ? AND id = ?", userID, secretID).Delete(&model.Secret{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("secret not found or not deleted")
+	}
+	return nil
+}
+
+func (s *SecretService) UpdateSecret(ctx context.Context, userID uint, id int, input model.Secret) error {
+	return s.repo.UpdateSecret(ctx, userID, id, input)
 }

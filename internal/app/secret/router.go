@@ -23,7 +23,10 @@ func RegisterAPIRoutes(router chi.Router, db *gorm.DB, commonConfig *common.Comm
 		r.Get("/list", secretHandler.List)
 		r.Post("/generatepassword", secretHandler.GeneratePassword)
 		r.Post("/secretdetail", secretHandler.SecretDetail)
+		r.Put("/update/{id}", secretHandler.Update)
+		r.Delete("/delete/{id}", secretHandler.Delete)
 	})
+
 }
 
 func RegisterWebRoutes(router chi.Router, renderer *tmplrndr.Renderer) {

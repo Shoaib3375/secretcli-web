@@ -13,6 +13,7 @@ type Secret struct {
 	Note      string     `json:"note"`
 	Email     string     `json:"email"`
 	Website   string     `json:"website"`
+	URL       string     `json:"url"`
 	UserID    uint       `json:"user_id"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt *time.Time `json:"updated_at"`
@@ -41,4 +42,6 @@ type SecretRepository interface {
 	List(ctx context.Context, userID uint) ([]Secret, error)
 	GeneratePassword(ctx context.Context, length int, includeSpecialSymbol bool) (string, error)
 	SecretDetail(ctx context.Context, userID uint, secretID int) (Secret, error)
+	UpdateSecret(ctx context.Context, userID uint, id int, input Secret) error
+	DeleteSecretByID(ctx context.Context, userID uint, secretID int) error
 }
