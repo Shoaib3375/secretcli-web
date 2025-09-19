@@ -134,33 +134,31 @@ func (h *SecretHandler) Create(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500				{object}	model.ErrorResponse
 //	@Router			/secret/api/list [get]
 func (h *SecretHandler) List(w http.ResponseWriter, r *http.Request) {
-	// Authorization check
 	user, err := auth.ValidateToken(r, h.commonConfig.JWTSecretKey)
 	if err != nil || user == nil {
 		h.handleError(w, http.StatusUnauthorized, err)
 		return
 	}
-	// Fetch secrets and decrypt passwords
+
 	secrets, err := h.service.List(r.Context(), user.ID)
 	if err != nil {
 		h.handleError(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	// Decrypt each secret's password
 	for i := range secrets {
-		// Validate Base64 string
+		if secrets[i].Password == "" {
+			continue
+		}
 		if !crypto.IsValidBase64(secrets[i].Password) {
-			h.handleError(w, http.StatusBadRequest, fmt.Errorf("invalid Base64 string"))
-			return
+			secrets[i].Password = "[CORRUPTED]"
+			continue
 		}
-
-		decryptedPassword, err := crypto.Decrypt(secrets[i].Password, []byte(h.commonConfig.SecretEncKey))
-		if err != nil {
-			h.handleError(w, http.StatusInternalServerError, err)
-			return
+		if decrypted, err := crypto.Decrypt(secrets[i].Password, []byte(h.commonConfig.SecretEncKey)); err == nil {
+			secrets[i].Password = decrypted
+		} else {
+			secrets[i].Password = "[CORRUPTED]"
 		}
-		secrets[i].Password = decryptedPassword
 	}
 
 	common.RespondWithSuccess(w, http.StatusOK, "Secrets retrieved successfully", map[string]interface{}{
