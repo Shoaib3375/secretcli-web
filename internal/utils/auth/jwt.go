@@ -1,11 +1,12 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/mahinops/secretcli-web/model"
 )
 
@@ -40,7 +41,7 @@ func ValidateToken(r *http.Request, JWTSecretKey string) (*model.Auth, error) {
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.NewValidationError("unexpected signing method", jwt.ValidationErrorSignatureInvalid)
+			return nil, errors.New("unexpected signing method")
 		}
 		return []byte(JWTSecretKey), nil
 	})
@@ -51,20 +52,20 @@ func ValidateToken(r *http.Request, JWTSecretKey string) (*model.Auth, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, jwt.NewValidationError("invalid claims", jwt.ValidationErrorClaimsInvalid)
+		return nil, errors.New("invalid claims")
 	}
 
 	// Extract exp as float64 (unix timestamp)
 	expFloat, ok := claims["exp"].(float64)
 	if !ok {
-		return nil, jwt.NewValidationError("invalid expiry claim", jwt.ValidationErrorClaimsInvalid)
+		return nil, errors.New("invalid expiry claim")
 	}
 
 	expiryTime := time.Unix(int64(expFloat), 0)
 	currentTime := time.Now()
 
 	if currentTime.After(expiryTime) {
-		return nil, jwt.NewValidationError("token has expired", jwt.ValidationErrorExpired)
+		return nil, errors.New("token has expired")
 	}
 
 	user := &model.Auth{
