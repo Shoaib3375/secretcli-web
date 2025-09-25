@@ -32,7 +32,7 @@ func NewApp(configFile, mode string) (*App, error) {
 
 	// CORS configuration
 	corsOptions := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8081"}, // Allow your frontend origin
+		AllowedOrigins:   []string{"http://localhost:8081", "http://localhost:5173"}, // Allow your frontend origin
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"}, // Make sure to include any custom headers
 		ExposedHeaders:   []string{"Authorization"},

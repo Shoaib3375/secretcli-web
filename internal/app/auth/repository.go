@@ -45,5 +45,6 @@ func (r *SqlAuthRepository) UpdateLastAuth(ctx context.Context, userID uint) err
 
 func (r *SqlAuthRepository) UpdateExpiry(ctx context.Context, userID uint, jwtExpiryDuration time.Duration) error {
 	expiryTime := time.Now().Add(jwtExpiryDuration) // Use the constant here
+
 	return r.db.Model(&model.Auth{}).Where("id = ?", userID).Update("expiry", expiryTime).Error
 }

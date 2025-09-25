@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"io"
 )
 
@@ -44,6 +45,10 @@ func Decrypt(cipherText string, key []byte) (string, error) {
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return "", err
+	}
+
+	if len(cipherTextBytes) < gcm.NonceSize() {
+		return "", errors.New("ciphertext too short")
 	}
 
 	nonce, cipherTextBytes := cipherTextBytes[:gcm.NonceSize()], cipherTextBytes[gcm.NonceSize():]

@@ -13,8 +13,8 @@ func GenerateToken(user *model.Auth, JWTSecretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id":   user.ID,
 		"email":     user.Email,
-		"exp":       user.Expiry,
-		"last_auth": user.LastAuth,
+		"exp":       time.Now().Add(1 * time.Hour).Unix(),
+		"last_auth": time.Now().Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(JWTSecretKey))
@@ -54,15 +54,13 @@ func ValidateToken(r *http.Request, JWTSecretKey string) (*model.Auth, error) {
 		return nil, jwt.NewValidationError("invalid claims", jwt.ValidationErrorClaimsInvalid)
 	}
 
-	expiryStr, ok := claims["exp"].(string)
+	// Extract exp as float64 (unix timestamp)
+	expFloat, ok := claims["exp"].(float64)
 	if !ok {
 		return nil, jwt.NewValidationError("invalid expiry claim", jwt.ValidationErrorClaimsInvalid)
 	}
 
-	expiryTime, err := time.Parse(time.RFC3339, expiryStr)
-	if err != nil {
-		return nil, err
-	}
+	expiryTime := time.Unix(int64(expFloat), 0)
 	currentTime := time.Now()
 
 	if currentTime.After(expiryTime) {
@@ -73,6 +71,7 @@ func ValidateToken(r *http.Request, JWTSecretKey string) (*model.Auth, error) {
 		ID:    uint(claims["user_id"].(float64)), // Type assertion to uint
 		Email: claims["email"].(string),
 	}
+
 	return user, nil
 }
 
